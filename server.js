@@ -17,6 +17,7 @@ app.get('/games_for_team/:team_id', routes.games_for_team);
 app.get('/games_for_player/:player_id', routes.games_for_player);
 app.get('/player/:player_id', routes.player_information);
 app.get('/player/:player_id/average_stats', routes.player_average_stats);
+app.get('/player/:player_id/spread_performance', routes.player_spread_performance);
 
 app.listen(config.server_port, () => {
     console.log(`Server running at http://${config.server_host}:${config.server_port}/`)
