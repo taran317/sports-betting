@@ -12,21 +12,6 @@ const connection = mysql.createConnection({
 });
 connection.connect((err) => err && console.log(err));
 
-const test = async function(req, res) {
-    connection.query(`
-        SELECT *
-        FROM teams
-        ORDER BY name
-    `, (err, data) => {
-        if (err || data.length == 0) {
-            console.log(err);
-            res.json({});
-        } else {
-            res.json(data);
-        }
-    });
-}
-
 // game page routes
 
 // GET /game/:game_id
@@ -93,9 +78,48 @@ const game_betting = async function(req, res) {
     });
 }
 
+// GET /games_for_team/:team_id
+// Fetches game_id, matchup, and game_date for specific team_id
+// Ordered by game_date
+const games_for_team = async function(req, res) {
+    connection.query(`
+        SELECT G.game_id, G.matchup, G.game_date
+        FROM game_data G
+        WHERE team_id = ${req.params.team_id}
+        ORDER BY G.game_date;
+    `, (err, data) => {
+        if (err || data.length == 0) {
+            console.log(err);
+            res.json({});
+        } else {
+            res.json(data);
+        }
+    });
+}
+
+// GET /games_for_player/:player_id
+// Fetches game_id, matchup, game date, and stats for specific player_id
+// Ordered by game_date
+const games_for_player = async function(req, res) {
+    connection.query(`
+        SELECT G.matchup, G.game_date, PS.*
+        FROM game_data G JOIN player_stats PS on G.game_id = PS.game_id and G.team_id = PS.team_id
+        WHERE player_id = ${req.params.player_id}
+        ORDER BY G.game_date;
+    `, (err, data) => {
+        if (err || data.length == 0) {
+            console.log(err);
+            res.json({});
+        } else {
+            res.json(data);
+        }
+    });
+}
+
 module.exports = {
-    test,
     game,
     game_players,
     game_betting,
+    games_for_team,
+    games_for_player,
 }
