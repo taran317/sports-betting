@@ -116,10 +116,53 @@ const games_for_player = async function(req, res) {
     });
 }
 
+/*
+    GET /player/:player_id
+    Returns player information for specific player_id
+*/
+const player_information = async function(req, res) {
+    connection.query(`
+        SELECT *
+        FROM players
+        WHERE person_id = ${req.params.player_id};
+    `, (err, data) => {
+        if (err || data.length == 0) {
+            console.log(err);
+            res.json({});
+        } else {
+            res.json(data);
+        }
+    });
+}
+
+/*
+    GET /player/:player_id/average_stats
+    Returns average stats for specific player_id
+*/
+const player_average_stats = async function(req, res) {
+  connection.query(
+    `
+        SELECT AVG(min) as min, AVG(fgm) as fgm, AVG(fga) as fga, AVG(fg_pct) as fg_pct, AVG(fg3m) as fg3m, AVG(fg3a) as fg3a, AVG(fg3_pct) as fg3_pct, AVG(ftm) as ftm, AVG(fta) as fta, AVG(ft_pct) as ft_pct, AVG(oreb) as oreb, AVG(dreb) as dreb, AVG(reb) as reb, AVG(ast) as ast, AVG(stl) as stl, AVG(blk) as blk, AVG(tov) as tov, AVG(pf) as pf, AVG(pts) as pts, AVG(plus_minus) as plus_minus
+        FROM player_stats
+        WHERE player_id = ${req.params.player_id};
+    `,
+    (err, data) => {
+      if (err || data.length == 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
+}
+
 module.exports = {
     game,
     game_players,
     game_betting,
     games_for_team,
     games_for_player,
+    player_information,
+    player_average_stats
 }
