@@ -3,7 +3,7 @@
   "rds_port": "3306",
   "rds_user": "Akula112233",
   "rds_password" : "CisSpring550",
-  "rds_db": "SWIFTIFY",
+  "rds_db": "SPORTS_BETTING",
   "server_host": "localhost",
   "server_port":"8080"
 }
