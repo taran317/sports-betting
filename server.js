@@ -21,6 +21,7 @@ app.get('/player/:player_id/spread_performance', routes.player_spread_performanc
 app.get('/team/:team_id', routes.team);
 app.get('/team/:team_id/game-betting-data', routes.team_game_betting_data);
 app.get('/team/:team_id/underdog-wins', routes.team_underdog_wins);
+app.get('/team/:team_id/top-players', routes.top_players);
 app.get('/trivia/middling_total', routes.middling_total_betting);
 app.get('/trivia/middling_spread', routes.middling_spread_betting);
 app.get('/trivia/matchup_stats', routes.matchup_stats);

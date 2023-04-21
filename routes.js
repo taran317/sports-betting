@@ -457,6 +457,7 @@ module.exports = {
     matchup_stats,
     matchup_top_pairs,
     team,
+    top_players,
     team_game_betting_data,
     team_underdog_wins,
     middling_total_betting,
