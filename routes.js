@@ -212,10 +212,55 @@ ORDER BY COUNT(DISTINCT B.game_id) / TG.total_games DESC;
 
 // TODO: Add the query into the function
 const matchup_stats = async function (req, res) {
-    let team1ID = req.params.team1;
-    let team2ID = req.params.team2;
+    let team1ID = req.query.team1;
+    let team2ID = req.query.team2;
     connection.query(
-        ``,
+        `WITH win_loss AS (
+            SELECT SUM(IF(G.wl = 'W', 1, 0)) AS team1_wins, SUM(IF(G.wl = 'L', 1, 0)) AS team2_wins,
+                   AVG(G.pts) AS avg_pts_team1, AVG(G2.pts) AS avg_pts_team2, COUNT(DISTINCT G.game_id) AS total_games
+            FROM game_data G JOIN game_data G2 ON G.game_id = G2.game_id AND G.a_team_id = G2.team_id
+            WHERE G.team_id = ${team1ID} AND G.a_team_id = ${team2ID}
+        ),
+        betting_averages AS (
+            SELECT AVG(IF(B.team_id = ${team1ID}, B.spread1, B.spread2)) AS avg_spread_team1,
+                   AVG(IF(B.team_id = ${team2ID}, B.spread1, B.spread2)) AS avg_spread_team2,
+                   AVG(B.total1) AS average_total,
+                   AVG(IF(B.team_id = ${team1ID}, B.moneyline_price1, B.moneyline_price2)) AS avg_moneyline_price_team1,
+                   AVG(IF(B.team_id = ${team2ID}, B.moneyline_price1, B.moneyline_price2)) AS avg_moneyline_price_team2
+            FROM betting_data B
+            WHERE (B.team_id = ${team1ID} AND B.a_team_id = ${team2ID})
+               OR (B.a_team_id = ${team1ID} AND B.team_id = ${team2ID})
+        ),
+        advanced_betting_stats AS (
+            SELECT SUM(IF(B.team_id = G.team_id, IF((G.pts - G2.pts) > -1 * B.spread1, 1, 0),
+                        IF((G2.pts - G.pts) > -1 * B.spread2, 1, 0))) AS spread_success_team1,
+                    SUM(IF(B.team_id = G.team_id, IF((G.pts - G2.pts) > -1 * B.spread1, 0, 1),
+                        IF((G2.pts - G.pts) > -1 * B.spread2, 0, 1))) AS spread_success_team2,
+                    SUM(IF(B.team_id = G.team_id, IF(B.moneyline_price1 > 0 AND G.wl = 'W', 1, 0),
+                        IF(B.moneyline_price2 > 0 AND G.wl = 'L', 1, 0))) AS underdog_wins_team1,
+                    SUM(IF(B.team_id = G2.team_id, IF(B.moneyline_price1 > 0 AND G2.wl = 'W', 1, 0),
+                        IF(B.moneyline_price2 > 0 AND G2.wl = 'L', 1, 0))) AS underdog_wins_team2,
+                    SUM(IF(B.team_id = G.team_id, IF(G.wl = 'W',
+                            IF(B.moneyline_price1 > 0, B.moneyline_price1, 10000 / B.moneyline_price1 * -1), -100),
+                        IF(G.wl = 'L',
+                            IF(B.moneyline_price2 > 0, B.moneyline_price2, 10000 / B.moneyline_price2 * -1), -100)))
+                        AS total_money_team1,
+                    SUM(IF(B.team_id = G2.team_id, IF(G2.wl = 'W',
+                            IF(B.moneyline_price1 > 0, B.moneyline_price1, 10000 / B.moneyline_price1 * -1), -100),
+                        IF(G2.wl = 'L',
+                            IF(B.moneyline_price2 > 0, B.moneyline_price2, 10000 / B.moneyline_price2 * -1), -100)))
+                        AS total_money_team2,
+                    AVG(ABS((G2.pts - G.pts) - B.spread1)) AS average_spread_error
+            FROM game_data G, game_data G2, betting_data B
+            WHERE G.team_id = ${team1ID} AND G.a_team_id = ${team2ID}
+                AND G.game_id = G2.game_id AND G.a_team_id = G2.team_id
+                AND B.game_id = G.game_id
+                AND ((B.team_id = G.team_id AND B.a_team_id = G.a_team_id)
+                    OR (B.team_id = G.a_team_id AND B.a_team_id = G.team_id))
+                AND B.book_name = '5Dimes'
+        )
+        SELECT *
+        FROM win_loss, betting_averages, advanced_betting_stats;`,
         (err, data) => {
             if (err || data.length === 0) {
                 console.log(err);
@@ -226,6 +271,36 @@ const matchup_stats = async function (req, res) {
         }
     );
 };
+
+const matchup_top_pairs = async function (req, res) {
+    let team1ID = req.query.team1;
+    let team2ID = req.query.team2;
+    connection.query(`
+    WITH total_games AS (
+        SELECT PS1.player_id AS id1, PS2.player_id AS id2, COUNT(DISTINCT PS1.game_id) AS total_games
+        FROM player_stats PS1 JOIN player_stats PS2 ON PS1.game_id = PS2.game_id AND PS1.team_id <> PS2.team_id
+        WHERE PS1.team_id = ${team1ID} AND PS2.team_id = ${team2ID}
+        GROUP BY PS1.player_id, PS2.player_id
+    )
+    SELECT P1.display_first_last AS player1, P2.display_first_last AS player2, AVG((PS1.pts + PS2.pts) / (G1.pts + G2.pts)) AS avg_pct_pts
+    FROM player_stats PS1 JOIN player_stats PS2 ON PS1.game_id = PS2.game_id AND PS1.team_id <> PS2.team_id
+        JOIN game_data G1 ON PS1.game_id = G1.game_id AND PS1.team_id = G1.team_id
+        JOIN game_data G2 ON PS1.game_id = G2.game_id AND PS2.team_id = G2.team_id
+        JOIN players P1 ON PS1.player_id = P1.person_id
+        JOIN players P2 ON PS2.player_id = P2.person_id
+        JOIN total_games TG ON PS1.player_id = TG.id1 AND PS2.player_id = TG.id2
+    WHERE PS1.team_id = ${team1ID} AND PS2.team_id = ${team2ID} AND TG.total_games >= 3
+    GROUP BY PS1.player_id, PS2.player_id
+    ORDER BY AVG((PS1.pts + PS2.pts) / (G1.pts + G2.pts)) DESC;
+    `, (err, data) => {
+        if (err || data.length == 0) {
+            console.log(err);
+            res.json({});
+        } else {
+            res.json(data);
+        }
+    });
+}
 
 const team = async function (req, res) {
     let team1ID = req.params.team_id;
@@ -319,19 +394,55 @@ LIMIT ${num_players}
                 console.log(err);
                 res.json({});
             } else {
-                output = [[], []];
-                for (i = 0; i < data.length; i++) {
-                    if (data[i].is_home === "t") {
-                        output[0].push(data[i]);
-                    } else {
-                        output[1].push(data[i]);
-                    }
-                }
-                res.json(output);
+                res.json(data);
             }
         }
     );
 };
+
+// trivia page
+
+const middling_total_betting = async function (req, res) {
+    let threshold = req.query.threshold;
+    connection.query(
+        `SELECT SUM(IF(G1.pts + G2.pts > B1.total1, 10000 / ABS(B1.total_price1), IF(G1.pts + G2.pts = B1.total1, 0, -100)))
+        + SUM(IF(G1.pts + G2.pts < B2.total1, 10000 / ABS(B2.total_price1), IF(G1.pts + G2.pts = B2.total1, 0, -100))) AS middle_total_money,
+        SUM(IF(G1.pts + G2.pts > B1.total1 AND G1.pts + G2.pts < B2.total1, 1, 0)) AS middles_total_won,
+        SUM(IF(G1.pts + G2.pts > B1.total1 AND G1.pts + G2.pts < B2.total1, 0, 1)) AS middles_total_lost
+        FROM betting_data B1 JOIN betting_data B2 on B1.game_id = B2.game_id
+        JOIN game_data G1 ON B1.game_id = G1.game_id AND B1.team_id = G1.team_id
+        JOIN game_data G2 ON B1.game_id = G2.game_id AND B1.a_team_id = G2.team_id
+        WHERE B1.total1 <= B2.total1 - ${threshold};`,
+        (err, data) => {
+            if (err || data.length == 0) {
+                console.log(err);
+            } else {
+                res.json(data);
+            }
+        }
+    )
+}
+
+const middling_spread_betting = async function (req, res) {
+    let threshold = req.query.threshold;
+    connection.query(
+        `SELECT SUM(IF(G1.pts + G2.pts > B1.total1, 10000 / ABS(B1.total_price1), IF(G1.pts + G2.pts = B1.total1, 0, -100)))
+        + SUM(IF(G1.pts + G2.pts < B2.total1, 10000 / ABS(B2.total_price1), IF(G1.pts + G2.pts = B2.total1, 0, -100))) AS middle_total_money,
+        SUM(IF(G1.pts + G2.pts > B1.total1 AND G1.pts + G2.pts < B2.total1, 1, 0)) AS middles_total_won,
+        SUM(IF(G1.pts + G2.pts > B1.total1 AND G1.pts + G2.pts < B2.total1, 0, 1)) AS middles_total_lost
+        FROM betting_data B1 JOIN betting_data B2 on B1.game_id = B2.game_id
+        JOIN game_data G1 ON B1.game_id = G1.game_id AND B1.team_id = G1.team_id
+        JOIN game_data G2 ON B1.game_id = G2.game_id AND B1.a_team_id = G2.team_id
+        WHERE B1.total1 <= B2.total1 - ${threshold};`,
+        (err, data) => {
+            if (err || data.length == 0) {
+                console.log(err);
+            } else {
+                res.json(data);
+            }
+        }
+    )
+}
 
 
 module.exports = {
@@ -344,7 +455,10 @@ module.exports = {
     player_average_stats,
     player_spread_performance,
     matchup_stats,
+    matchup_top_pairs,
     team,
     team_game_betting_data,
-    team_underdog_wins
+    team_underdog_wins,
+    middling_total_betting,
+    middling_spread_betting,
 };
