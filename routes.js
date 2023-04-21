@@ -62,6 +62,66 @@ const game_players = async function(req, res) {
     });
 }
 
+const matchup_stats = async function(req, res) {
+    team1 = req.query.team1;
+    team2 = req.query.team2;
+    connection.query(`
+        WITH win_loss AS (
+            SELECT SUM(IF(G.wl = 'W', 1, 0)) AS team1_wins, SUM(IF(G.wl = 'L', 1, 0)) AS team2_wins,
+                AVG(G.pts) AS avg_pts_team1, AVG(G2.pts) AS avg_pts_team2, COUNT(DISTINCT G.game_id) AS total_games
+            FROM game_data G JOIN game_data G2 ON G.game_id = G2.game_id AND G.a_team_id = G2.team_id
+            WHERE G.team_id = ${team1} AND G.a_team_id = ${team2}
+        ),
+        betting_averages AS (
+            SELECT AVG(IF(B.team_id = ${team1}, B.spread1, B.spread2)) AS avg_spread_team1,
+                AVG(IF(B.team_id = ${team2}, B.spread1, B.spread2)) AS avg_spread_team2,
+                AVG(B.total1) AS average_total,
+                AVG(IF(B.team_id = ${team1}, B.moneyline_price1, B.moneyline_price2)) AS avg_moneyline_price_team1,
+                AVG(IF(B.team_id = ${team2}, B.moneyline_price1, B.moneyline_price2)) AS avg_moneyline_price_team2
+            FROM betting_data B
+            WHERE (B.team_id = ${team1} AND B.a_team_id = ${team2})
+            OR (B.a_team_id = ${team1} AND B.team_id = ${team2})
+        ),
+        advanced_betting_stats AS (
+            SELECT SUM(IF(B.team_id = G.team_id, IF((G.pts - G2.pts) > -1 * B.spread1, 1, 0),
+                        IF((G2.pts - G.pts) > -1 * B.spread2, 1, 0))) AS spread_success_team1,
+                    SUM(IF(B.team_id = G.team_id, IF((G.pts - G2.pts) > -1 * B.spread1, 0, 1),
+                        IF((G2.pts - G.pts) > -1 * B.spread2, 0, 1))) AS spread_success_team2,
+                    SUM(IF(B.team_id = G.team_id, IF(B.moneyline_price1 > 0 AND G.wl = 'W', 1, 0),
+                        IF(B.moneyline_price2 > 0 AND G.wl = 'L', 1, 0))) AS underdog_wins_team1,
+                    SUM(IF(B.team_id = G2.team_id, IF(B.moneyline_price1 > 0 AND G2.wl = 'W', 1, 0),
+                        IF(B.moneyline_price2 > 0 AND G2.wl = 'L', 1, 0))) AS underdog_wins_team2,
+                    SUM(IF(B.team_id = G.team_id, IF(G.wl = 'W',
+                            IF(B.moneyline_price1 > 0, B.moneyline_price1, 10000 / B.moneyline_price1 * -1), -100),
+                        IF(G.wl = 'L',
+                            IF(B.moneyline_price2 > 0, B.moneyline_price2, 10000 / B.moneyline_price2 * -1), -100)))
+                        AS total_money_team1,
+                    SUM(IF(B.team_id = G2.team_id, IF(G2.wl = 'W',
+                            IF(B.moneyline_price1 > 0, B.moneyline_price1, 10000 / B.moneyline_price1 * -1), -100),
+                        IF(G2.wl = 'L',
+                            IF(B.moneyline_price2 > 0, B.moneyline_price2, 10000 / B.moneyline_price2 * -1), -100)))
+                        AS total_money_team2,
+                    AVG(ABS(ABS(G.pts - G2.pts) - ABS(B.spread1))) AS average_spread_error
+            FROM game_data G, game_data G2, betting_data B
+            WHERE G.team_id = ${team1} AND G.a_team_id = ${team2}
+                AND G.game_id = G2.game_id AND G.a_team_id = G2.team_id
+                AND B.game_id = G.game_id
+                AND ((B.team_id = G.team_id AND B.a_team_id = G.a_team_id)
+                    OR (B.team_id = G.a_team_id AND B.a_team_id = G.team_id))
+                AND B.book_name = '5Dimes'
+        )
+        SELECT *
+        FROM win_loss, betting_averages, advanced_betting_stats;
+    `, (err, data) => {
+        if (err || data.length == 0) {
+            console.log(err);
+            res.json({});
+        } else {
+            res.json(data[0]);
+        }
+    })
+}
+
 // GET /game_betting/:game_id
 const game_betting = async function(req, res) {
     connection.query(`
@@ -122,4 +182,5 @@ module.exports = {
     game_betting,
     games_for_team,
     games_for_player,
+    matchup_stats
 }

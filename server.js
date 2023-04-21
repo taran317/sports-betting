@@ -15,6 +15,7 @@ app.get('/game_players/:game_id', routes.game_players);
 app.get('/game_betting/:game_id', routes.game_betting);
 app.get('/games_for_team/:team_id', routes.games_for_team);
 app.get('/games_for_player/:player_id', routes.games_for_player);
+app.get('/matchup_stats/', routes.matchup_stats);
 
 app.listen(config.server_port, () => {
     console.log(`Server running at http://${config.server_host}:${config.server_port}/`)
