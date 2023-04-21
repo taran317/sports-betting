@@ -228,7 +228,7 @@ const matchup_stats = async function (req, res) {
 };
 
 const team = async function (req, res) {
-    let team1ID = req.params.team1;
+    let team1ID = req.params.team_id;
     connection.query(
         `WITH unique_games_avg AS (
     SELECT team_id, SUM(w) as number_wins, SUM(l) as number_losses, AVG(pts) as avg_points, AVG(reb) as avg_rebounds, AVG(ast) as avg_assists
@@ -246,27 +246,92 @@ FROM unique_games_avg JOIN teams ON unique_games_avg.team_id = teams.team_id WHE
     );
 };
 
-//TODO Working on this one right now, just saving
 const team_game_betting_data = async function (req, res) {
-    let team1ID = req.params.team1;
+    let team1ID = req.params.team_id;
     connection.query(
-        `WITH unique_games_avg AS (
-    SELECT team_id, SUM(w) as number_wins, SUM(l) as number_losses, AVG(pts) as avg_points, AVG(reb) as avg_rebounds, AVG(ast) as avg_assists
-    FROM game_data GROUP BY team_id
-) SELECT name, abbreviation, teams.team_id, number_wins, number_losses, avg_points, avg_rebounds, avg_assists, min_year, max_year
-FROM unique_games_avg JOIN teams ON unique_games_avg.team_id = teams.team_id WHERE teams.team_id = ${team1ID};`,
+        `SELECT * FROM betting_data WHERE team_id = ${team1ID};`,
         (err, data) => {
             if (err || data.length === 0) {
                 console.log(err);
                 res.json({});
             } else {
-                res.json(data);
+                output = {}
+                for (let i = 0; i < data.length; i++) {
+                    tempValue = output[data[i].game_id] || [];
+                    tempValue.push(data[i]);
+                    output[data[i].game_id] = tempValue;
+                }
+                res.json(output);
             }
         }
     );
 };
 
+const team_underdog_wins = async function (req, res) {
+    let team1ID = req.params.team_id;
+    connection.query(
+        `WITH total_underdog_games AS (
+   SELECT B.game_id
+   FROM betting_data B, game_data G
+   WHERE G.team_id = ${team1ID}
+       AND B.game_id = G.game_id
+       AND G.wl = "W"
+       AND ((B.moneyline_price1 > 0)
+           OR (B.moneyline_price2 > 0))
+   GROUP BY B.game_id
+) SELECT G1.*
+FROM total_underdog_games UG JOIN betting_data G1 ON UG.game_id = G1.game_id;`,
+        (err, data) => {
+            if (err || data.length === 0) {
+                console.log(err);
+                res.json({});
+            } else {
+                output = {}
+                for (let i = 0; i < data.length; i++) {
+                    tempValue = output[data[i].game_id] || [];
+                    tempValue.push(data[i]);
+                    output[data[i].game_id] = tempValue;
+                }
+                res.json(output);
+            }
+        }
+    );
+};
 
+const top_players = async function (req, res) {
+    let team_id = req.params.team_id;
+    let num_players = req.query.num_players;
+    connection.query(
+        `
+        WITH player_stats_avg AS (
+    SELECT player_id, team_id, AVG(pts) as avg_pts, AVG(ast) as avg_ast, AVG(reb) as avg_reb
+    FROM player_stats
+    GROUP BY player_id
+)
+SELECT player_id, display_last_comma_first, display_first_last, avg_pts, avg_ast, avg_reb, from_year, to_year, player_code, jersey, school, country, last_affiliation
+FROM players P JOIN player_stats_avg PSA on P.person_id = PSA.player_id
+WHERE team_id = ${team_id}
+ORDER BY avg_pts DESC, avg_ast, avg_reb
+LIMIT ${num_players}
+    `,
+        (err, data) => {
+            if (err || data.length === 0) {
+                console.log(err);
+                res.json({});
+            } else {
+                output = [[], []];
+                for (i = 0; i < data.length; i++) {
+                    if (data[i].is_home === "t") {
+                        output[0].push(data[i]);
+                    } else {
+                        output[1].push(data[i]);
+                    }
+                }
+                res.json(output);
+            }
+        }
+    );
+};
 
 
 module.exports = {
@@ -280,5 +345,6 @@ module.exports = {
     player_spread_performance,
     matchup_stats,
     team,
-
+    team_game_betting_data,
+    team_underdog_wins
 };
