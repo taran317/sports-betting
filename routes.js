@@ -179,6 +179,8 @@ const player_average_stats = async function (req, res) {
     GET /player/:player_id/spread_performance
     Returns num games the player covered the spread, total games, and percentage of games the player covered the spread
  */
+
+// COMPLEX
 const player_spread_performance = async function (req, res) {
     connection.query(
         `
@@ -211,9 +213,11 @@ ORDER BY COUNT(DISTINCT B.game_id) / TG.total_games DESC;
 };
 
 // TODO: Add the query into the function
+// COMPLEX
 const matchup_stats = async function (req, res) {
     let team1ID = req.query.team1;
     let team2ID = req.query.team2;
+    // TODO Make default scenario
     connection.query(
         `WITH win_loss AS (
             SELECT SUM(IF(G.wl = 'W', 1, 0)) AS team1_wins, SUM(IF(G.wl = 'L', 1, 0)) AS team2_wins,
@@ -272,6 +276,7 @@ const matchup_stats = async function (req, res) {
     );
 };
 
+// COMPLEX
 const matchup_top_pairs = async function (req, res) {
     let team1ID = req.query.team1;
     let team2ID = req.query.team2;
@@ -428,7 +433,7 @@ GROUP BY gwd.team_id;
 
 
 // trivia page
-
+// COMPLEX
 const middling_total_betting = async function (req, res) {
     let threshold = req.query.threshold;
     connection.query(
@@ -450,6 +455,7 @@ const middling_total_betting = async function (req, res) {
     )
 }
 
+// COMPLEX
 const middling_spread_betting = async function (req, res) {
     let threshold = req.query.threshold;
     connection.query(
@@ -504,6 +510,7 @@ const team_search = async function (req, res) {
     )
 }
 
+// COMPLEX
 const game_search = async function (req, res) {
     let team1_substring = req.query['name-or-abbreviation1'];
     let team2_substring = req.query['name-or-abbreviation2'];
@@ -540,6 +547,8 @@ WHERE g1.team_id IN (SELECT * FROM potential_team1_by_name) AND g2.team_id IN (S
         }
     )
 }
+
+// COMPLEX QUERY
 const team_underdog_winrate = async function (req, res) {
     connection.query(
         `WITH underdog_win_games AS (
