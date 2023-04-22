@@ -21,11 +21,19 @@ app.get('/player/:player_id/spread_performance', routes.player_spread_performanc
 app.get('/team/:team_id', routes.team);
 app.get('/team/:team_id/game-betting-data', routes.team_game_betting_data);
 app.get('/team/:team_id/underdog-wins', routes.team_underdog_wins);
-app.get('/team/:team_id/top-players', routes.top_players);
+app.get('/team/:team_id/top-players', routes.team_top_players);
 app.get('/trivia/middling_total', routes.middling_total_betting);
 app.get('/trivia/middling_spread', routes.middling_spread_betting);
 app.get('/trivia/matchup_stats', routes.matchup_stats);
 app.get('/trivia/matchup_top_pairs', routes.matchup_top_pairs);
+app.get('/team/:team_id/spread-covering-percentage', routes.team_spread_covering_percentage);
+app.get('/player/search', routes.player_search);
+app.get('/team/search', routes.team_search);
+app.get('/game/search', routes.game_search);
+app.get('/team/underdog-winrate', routes.team_underdog_winrate);
+
+
+
 
 app.listen(config.server_port, () => {
     console.log(`Server running at http://${config.server_host}:${config.server_port}/`)
