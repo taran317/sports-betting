@@ -293,7 +293,7 @@ const matchup_top_pairs = async function (req, res) {
     GROUP BY PS1.player_id, PS2.player_id
     ORDER BY AVG((PS1.pts + PS2.pts) / (G1.pts + G2.pts)) DESC;
     `, (err, data) => {
-        if (err || data.length == 0) {
+        if (err || data.length === 0) {
             console.log(err);
             res.json({});
         } else {
@@ -373,7 +373,7 @@ FROM total_underdog_games UG JOIN betting_data G1 ON UG.game_id = G1.game_id;`,
     );
 };
 
-const top_players = async function (req, res) {
+const team_top_players = async function (req, res) {
     let team_id = req.params.team_id;
     let num_players = req.query.num_players;
     connection.query(
@@ -400,6 +400,33 @@ LIMIT ${num_players}
     );
 };
 
+const team_spread_covering_percentage = async function (req, res) {
+    let team_id = req.params.team_id;
+    connection.query(
+        `
+        WITH games_with_dff AS (SELECT gd.team_id, gd.game_id, AVG(bd.spread1) as spread1, AVG(gd2.pts) - AVG(gd.pts) as diff
+                        FROM game_data gd
+                                 JOIN betting_data bd ON bd.game_id = gd.game_id
+                                 JOIN game_data gd2 ON gd.game_id = gd2.game_id AND bd.a_team_id = gd2.team_id
+                        WHERE gd.team_id = ${team_id}
+                        GROUP BY gd.team_id, bd.game_id)
+SELECT gwd.team_id,IF(diff < spread1, 1, 0)
+FROM games_with_dff gwd
+GROUP BY gwd.team_id;
+    `,
+        (err, data) => {
+            if (err || data.length === 0) {
+                console.log(err);
+                res.json({});
+            } else {
+                res.json(data);
+            }
+        }
+    );
+};
+
+
+
 // trivia page
 
 const middling_total_betting = async function (req, res) {
@@ -414,7 +441,7 @@ const middling_total_betting = async function (req, res) {
         JOIN game_data G2 ON B1.game_id = G2.game_id AND B1.a_team_id = G2.team_id
         WHERE B1.total1 <= B2.total1 - ${threshold};`,
         (err, data) => {
-            if (err || data.length == 0) {
+            if (err || data.length === 0) {
                 console.log(err);
             } else {
                 res.json(data);
@@ -435,7 +462,110 @@ const middling_spread_betting = async function (req, res) {
         JOIN game_data G2 ON B1.game_id = G2.game_id AND B1.a_team_id = G2.team_id
         WHERE B1.total1 <= B2.total1 - ${threshold};`,
         (err, data) => {
-            if (err || data.length == 0) {
+            if (err || data.length === 0) {
+                console.log(err);
+            } else {
+                res.json(data);
+            }
+        }
+    )
+}
+
+const player_search = async function (req, res) {
+    let name_substring = req.query.name;
+    connection.query(
+        `SELECT from_year, to_year, draft_year, height_feet, height_inches, weight, team_id, jersey, school, country, AVG(fgm) as fgm, AVG(fga) as fga, avg(fg_pct) as fg_pct, avg(fg3m) as fg3m, avg(fg3a) as fg3a, avg(fg_pct) as fg3_pct, avg(ftm) as ftm, avg(ft_pct) as ft_pct, avg(oreb) as oreb, avg(dreb) as dreb, avg(reb) as reb, avg(ast) as ast, avg(stl) as stl, avg(blk) as blk, avg(tov) as tov, avg(pf) as pf
+FROM player_stats ps
+    JOIN players p on ps.player_id = p.person_id
+WHERE LOWER(p.display_first_last) LIKE LOWER('%${name_substring}%')
+GROUP BY p.person_id;`,
+        (err, data) => {
+            if (err || data.length === 0) {
+                console.log(err);
+            } else {
+                res.json(data);
+            }
+        }
+    )
+}
+const team_search = async function (req, res) {
+    let substring = req.query['name-or-abbreviation'];
+    connection.query(
+        `SELECT * FROM teams
+         WHERE UPPER(name) LIKE UPPER('%${substring}%')
+            OR UPPER(abbreviation) LIKE UPPER('%${substring}%');`,
+        (err, data) => {
+            if (err || data.length === 0) {
+                console.log(err);
+            } else {
+                res.json(data);
+            }
+        }
+    )
+}
+
+const game_search = async function (req, res) {
+    let team1_substring = req.query['name-or-abbreviation1'];
+    let team2_substring = req.query['name-or-abbreviation2'];
+    let min_pts = req.query['min-pts'];
+    let min_year = req.query['min-year'];
+    let max_year = req.query['max-year'];
+    connection.query(
+        `WITH potential_team1_by_name AS (
+    SELECT team_id
+    FROM teams
+    WHERE (name LIKE '%%') OR (abbreviation LIKE '%${team1_substring}%')
+), potential_team2_by_name AS (
+    SELECT team_id
+    FROM teams
+    WHERE (name LIKE '%%') OR (abbreviation LIKE '%${team2_substring}%')
+)
+SELECT g1.game_id, g1.team_id as home_team_id, g1.a_team_id as away_team_id, t.name as home_team_name, t2.name as away_team_name,
+       t.abbreviation as home_team_abbreviation, t2.abbreviation as away_team_abbreviation, g1.pts as home_team_pts
+       g2.pts as away_team_pts, g1.season_year as season_year
+FROM game_data g1
+JOIN game_data g2 ON g1.a_team_id = g2.team_id AND g1.game_id = g2.game_id
+JOIN teams t on g1.team_id = t.team_id
+JOIN teams t2 on g2.team_id = t2.team_id
+WHERE g1.team_id IN (SELECT * FROM potential_team1_by_name) AND g2.team_id IN (SELECT * FROM potential_team2_by_name)
+  AND ((g1.pts + g2.pts) >= COALESCE(${min_pts}, 0))
+  AND ((g1.season_year >= COALESCE(${min_year}, 0)) OR (${min_year} IS NULL))
+  AND ((g1.season_year <= COALESCE(${max_year}, g1.season_year)) OR (${max_year} IS NULL));`,
+        (err, data) => {
+            if (err || data.length === 0) {
+                console.log(err);
+            } else {
+                res.json(data);
+            }
+        }
+    )
+}
+const team_underdog_winrate = async function (req, res) {
+    connection.query(
+        `WITH underdog_win_games AS (
+   SELECT G.team_id, B.game_id, (-1*AVG(moneyline_price1)) as avg_moneyline_win, COUNT(*) as num_wins
+   FROM betting_data B, game_data G
+   WHERE B.game_id = G.game_id
+       AND G.wl = "W"
+       AND ((B.moneyline_price1 < 0))
+   GROUP BY G.team_id
+), underdog_loss_games AS (
+   SELECT G.team_id, B.game_id, AVG(moneyline_price1) as avg_moneyline_loss, COUNT(*) as num_losses
+   FROM betting_data B, game_data G
+   WHERE B.game_id = G.game_id
+       AND G.wl = "L"
+       AND ((B.moneyline_price1 < 0))
+   GROUP BY G.team_id
+)
+SELECT uwg.team_id, (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) as win_pctg,
+       uwg.avg_moneyline_win as avg_moneyline_win, ulg.avg_moneyline_loss as avg_moneyline_loss,
+       (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) * uwg.avg_moneyline_win +
+       (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) * ulg.avg_moneyline_loss as expected_moneyline_win_or_loss
+FROM underdog_win_games uwg
+    JOIN underdog_loss_games ulg ON uwg.team_id = ulg.team_id
+ORDER BY expected_moneyline_win_or_loss DESC;`,
+        (err, data) => {
+            if (err || data.length === 0) {
                 console.log(err);
             } else {
                 res.json(data);
@@ -457,9 +587,14 @@ module.exports = {
     matchup_stats,
     matchup_top_pairs,
     team,
-    top_players,
+    team_top_players,
+    team_spread_covering_percentage,
     team_game_betting_data,
     team_underdog_wins,
     middling_total_betting,
     middling_spread_betting,
+    player_search,
+    team_search,
+    game_search,
+    team_underdog_winrate
 };
