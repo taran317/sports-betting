@@ -17,6 +17,9 @@ import { Link as RouterLink } from 'react-router-dom';
 import { ChakraProvider } from '@chakra-ui/react';
 import { ColorModeScript } from '@chakra-ui/color-mode';
 import GamePage from './game';
+import { IconButton, useColorMode } from '@chakra-ui/react';
+import { MoonIcon, SunIcon } from '@chakra-ui/icons';
+
 
 const theme = extendTheme({
     colors: {
@@ -30,6 +33,22 @@ const theme = extendTheme({
     },
 });
 
+const ColorModeSwitcher = () => {
+    const { colorMode, toggleColorMode } = useColorMode();
+    return (
+        <IconButton
+            icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+            onClick={toggleColorMode}
+            aria-label="Toggle color mode"
+            position="fixed"
+            top="1rem"
+            right="1rem"
+            zIndex="10"
+            colorScheme="teal"
+        />
+    );
+};
+
 const HomePage = () => {
     const headingColor = useColorModeValue('gray.700', 'white');
     const buttonColor = 'primary.500';
@@ -39,16 +58,17 @@ const HomePage = () => {
     return (
         <ChakraProvider theme={theme}>
             <ColorModeScript initialColorMode="light" />
+            <ColorModeSwitcher />
             <Center>
             <Container maxW="100%" py={12}>
                 <Center>
                     <VStack>
-                <Box pos="relative" display="inline-block">
+                <Box pos="relative" display="inline-block" p={6}>
                     <Heading as="h1" size="2xl" background={titleGradient} color="transparent" backgroundClip="text">
                         Basketball Betting Statistics
                     </Heading>
                 </Box>
-                <VStack spacing={16} align="start" width="100%">
+                <VStack spacing={16} align="start" width="100%" >
                     <Tabs mt={4}>
                         <TabList>
                             <Tab>Game</Tab>

@@ -513,8 +513,8 @@ const game_search = async function (req, res) {
     let resultsPerPage = 20;
     let offset = (page - 1) * resultsPerPage;
 
-    let whereClauseTeam1 = team1_substring ? `WHERE (name LIKE '%${team1_substring}%') OR (abbreviation LIKE '%${team1_substring}%')` : 'WHERE 1=1';
-    let whereClauseTeam2 = team2_substring ? `WHERE (name LIKE '%${team2_substring}%') OR (abbreviation LIKE '%${team2_substring}%')` : 'WHERE 1=1';
+    let whereClauseTeam1 = team1_substring ? `WHERE (name LIKE '%${team1_substring}%') OR (abbreviation LIKE '%${team1_substring}%')` : '';
+    let whereClauseTeam2 = team2_substring ? `WHERE (name LIKE '%${team2_substring}%') OR (abbreviation LIKE '%${team2_substring}%')` : '';
 
 //     const sqlQuery = `WITH potential_team1_by_name AS (
 //     SELECT team_id
@@ -562,7 +562,7 @@ JOIN teams t2 on g2.team_id = t2.team_id
 WHERE g1.team_id IN (SELECT * FROM potential_team1_by_name) AND g2.team_id IN (SELECT * FROM potential_team2_by_name)
   AND ((g1.pts + g2.pts) >= COALESCE(?, 0))
   AND ((g1.season_year >= COALESCE(?, 0)) OR (? IS NULL))
-  AND ((g1.season_year <= COALESCE(?, g1.season_year)) OR (? IS NULL))
+  AND ((g1.season_year <= COALESCE(?, g1.season_year)) OR (? IS NULL)) GROUP BY g1.game_id
 LIMIT ? OFFSET ?;`,
         [min_pts, min_year, min_year, max_year, max_year, resultsPerPage, offset],
         (err, data) => {

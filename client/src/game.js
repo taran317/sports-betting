@@ -9,10 +9,12 @@ import {
     Grid,
     FormControl,
     FormLabel,
-    useToast, Tbody, Table, Thead, Th, Tr, Td, Flex,
+    useToast, Tbody, Table, Thead, Th, Tr, Td, Flex, Center,
+    useColorModeValue
 } from '@chakra-ui/react';
 import axios from 'axios';
 import GameCard from './gamecard';
+
 
 const GamePage = () => {
     const [gameData, setGameData] = useState(null);
@@ -22,6 +24,9 @@ const GamePage = () => {
     const [minYear, setMinYear] = useState('');
     const [maxYear, setMaxYear] = useState('');
     const [page, setPage] = useState(1);
+    const [selectedGameId, setSelectedGameId] = useState(null);
+    const hoverBgColor = useColorModeValue('gray.200', 'gray.700');
+
 
     const toast = useToast();
 
@@ -85,18 +90,39 @@ const GamePage = () => {
         handleSearch(page + 1);
     };
 
+    const handleGameClick = (gameId) => {
+        console.log('Game clicked:', gameId);
+        setSelectedGameId(gameId);
+    };
+
+    const handleReset = () => {
+        setTeam1Substring('');
+        setTeam2Substring('');
+        setMinPts('');
+        setMinYear('');
+        setMaxYear('');
+        handleSearch();
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        handleSearch();
+    };
+
     return (
+        <Flex direction="row">
         <VStack spacing={6}>
+            <form onSubmit={handleSubmit}>
             <Grid templateColumns="repeat(3, 1fr)" gap={4}>
                 <FormControl>
-                    <FormLabel>Team 1</FormLabel>
+                    <FormLabel>Home Team</FormLabel>
                     <Input
                         value={team1Substring}
                         onChange={(e) => setTeam1Substring(e.target.value)}
                     />
                 </FormControl>
                 <FormControl>
-                    <FormLabel>Team 2</FormLabel>
+                    <FormLabel>Away Team</FormLabel>
                     <Input
                         value={team2Substring}
                         onChange={(e) => setTeam2Substring(e.target.value)}
@@ -124,9 +150,15 @@ const GamePage = () => {
                     />
                 </FormControl>
             </Grid>
-            <Button onClick={() => handleSearch()} mt={4}>
-                Search
-            </Button>
+                <Center mt={4}>
+                    <Button onClick={handleReset} colorScheme="teal" mr={2}>
+                        Reset
+                    </Button>
+                    <Button type="submit" colorScheme="teal" ml={2}>
+                        Search
+                    </Button>
+                </Center>
+            </form>
             <Table mt={6} variant="simple" width="100%">
                 <Thead>
                     <Tr>
@@ -140,8 +172,13 @@ const GamePage = () => {
                 <Tbody>
                     {gameData &&
                         gameData.map((game) => (
-                            <Tr key={game.game_id}>
-                                <Td fontWeight="bold">{game.home_team_name}</Td>
+                            <Tr
+                                key={game.game_id}
+                                onClick={() => handleGameClick(game.game_id)}
+                                cursor="pointer"
+                                _hover={{ bg: hoverBgColor, transition: "all 0.2s" }}
+                            >
+                            <Td fontWeight="bold">{game.home_team_name}</Td>
                                 <Td fontWeight="bold">{game.away_team_name}</Td>
                                 <Td>{game.home_team_pts}</Td>
                                 <Td>{game.away_team_pts}</Td>
@@ -159,8 +196,11 @@ const GamePage = () => {
                     Next
                 </Button>
             </Flex>
-            <GameCard />
         </VStack>
+            <Box p={6}>
+                <GameCard gameId={selectedGameId} />
+            </Box>
+        </Flex>
     );
 };
 

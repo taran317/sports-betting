@@ -16,8 +16,8 @@ import {
 } from '@chakra-ui/react';
 import axios from 'axios';
 
-const GameCard = () => {
-    const [gameId, setGameId] = useState('');
+const GameCard = ({ gameId }) => {
+    const [localGameId, setLocalGameId] = useState(gameId);
     const [inputGameId, setInputGameId] = useState('');
     const [gameData, setGameData] = useState([]);
     const [gamePlayers, setGamePlayers] = useState([[], []]);
@@ -26,17 +26,21 @@ const GameCard = () => {
     const cardBg = useColorModeValue('gray.100', 'gray.900');
 
     useEffect(() => {
-        if (!gameId) return;
+        setLocalGameId(gameId);
+    }, [gameId]);
+
+    useEffect(() => {
+        if (!localGameId) return;
         async function fetchData() {
             try {
-                console.log(`${process.env.EXPRESS_APP_API_URL}/game/${gameId}`)
-                const gameRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/game/${gameId}`);
+                console.log(`/game/${localGameId}`)
+                const gameRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/game/${localGameId}`);
                 setGameData(gameRes.data);
-
-                const gamePlayersRes = await axios.get(`${process.env.EXPRESS_APP_API_URL}/game/${gameId}/players`);
+                console.log(`/game/${localGameId}/players`)
+                const gamePlayersRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/game/${localGameId}/players`);
                 setGamePlayers(gamePlayersRes.data);
-
-                const gameBettingRes = await axios.get(`${process.env.EXPRESS_APP_API_URL}/game/${gameId}/betting`);
+                console.log(`/game/${localGameId}/betting`)
+                const gameBettingRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/game/${localGameId}/betting`);
                 setGameBetting(gameBettingRes.data);
             } catch (err) {
                 console.error(err);
@@ -44,34 +48,34 @@ const GameCard = () => {
         }
 
         fetchData();
-    }, [gameId]);
+    }, [localGameId]);
 
-    const handleInputChange = (event) => {
-        setInputGameId(event.target.value);
-    };
+    // const handleInputChange = (event) => {
+    //     setInputGameId(event.target.value);
+    // };
 
-    const handleSubmit = () => {
-        setGameId(inputGameId);
-    };
+    // const handleSubmit = () => {
+    //     setGameId(inputGameId);
+    // };
 
     return (
         <Box>
-            <HStack>
-                <Text fontSize="md" fontWeight="bold" marginRight="10px">
-                    Enter Game ID
-                </Text>
-                <Input
-                    value={inputGameId}
-                    onChange={handleInputChange}
-                    placeholder="Enter game ID"
-                    size="sm"
-                    width="200px"
-                    marginRight="10px"
-                />
-                <Button onClick={handleSubmit} colorScheme="blue" size="sm">
-                    Update
-                </Button>
-            </HStack>
+            {/*<HStack>*/}
+            {/*    <Text fontSize="md" fontWeight="bold" marginRight="10px">*/}
+            {/*        Enter Game ID*/}
+            {/*    </Text>*/}
+            {/*    <Input*/}
+            {/*        value={inputGameId}*/}
+            {/*        onChange={handleInputChange}*/}
+            {/*        placeholder="Enter game ID"*/}
+            {/*        size="sm"*/}
+            {/*        width="200px"*/}
+            {/*        marginRight="10px"*/}
+            {/*    />*/}
+            {/*    <Button onClick={handleSubmit} colorScheme="blue" size="sm">*/}
+            {/*        Update*/}
+            {/*    </Button>*/}
+            {/*</HStack>*/}
             {gameId && (
                 <Box
                     borderWidth="1px"
@@ -119,7 +123,7 @@ const GameCard = () => {
                                     <Thead>
                                         <Tr>
                                             <Th>Player Name</Th>
-                                            <Th>Position</Th>
+                                            <Th>Minutes</Th>
                                             <Th>Points</Th>
                                             <Th>Rebounds</Th>
                                             <Th>Assists</Th>
@@ -129,9 +133,9 @@ const GameCard = () => {
                                         {teamPlayers.map((player, index) => (
                                             <Tr key={index}>
                                                 <Td>{player.display_first_last}</Td>
-                                                <Td>{player.pos}</Td>
+                                                <Td>{player.min}</Td>
                                                 <Td>{player.pts}</Td>
-                                                <Td>{player.totReb}</Td>
+                                                <Td>{player.reb}</Td>
                                                 <Td>{player.ast}</Td>
                                             </Tr>
                                         ))}
