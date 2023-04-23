@@ -5,5 +5,5 @@
   "rds_password" : "CisSpring550",
   "rds_db": "SPORTS_BETTING",
   "server_host": "localhost",
-  "server_port":"3000"
+  "server_port":"6100"
 }

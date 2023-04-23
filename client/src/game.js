@@ -1,141 +1,167 @@
-import React, {useEffect, useState} from 'react';
-import {useParams} from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import {
-    Box,
     VStack,
-    Text,
     Heading,
-    useColorModeValue,
-    Table,
-    Thead,
-    Tbody,
-    Tr,
-    Th,
-    Td,
+    Box,
+    Text,
+    Input,
+    Button,
+    Grid,
+    FormControl,
+    FormLabel,
+    useToast, Tbody, Table, Thead, Th, Tr, Td, Flex,
 } from '@chakra-ui/react';
 import axios from 'axios';
+import GameCard from './gamecard';
 
 const GamePage = () => {
-    const {game_id} = useParams();
-    const [gameData, setGameData] = useState([]);
-    const [gamePlayers, setGamePlayers] = useState([[], []]);
-    const [gameBetting, setGameBetting] = useState([]);
-    const textColor = useColorModeValue('gray.700', 'white');
+    const [gameData, setGameData] = useState(null);
+    const [team1Substring, setTeam1Substring] = useState('');
+    const [team2Substring, setTeam2Substring] = useState('');
+    const [minPts, setMinPts] = useState('');
+    const [minYear, setMinYear] = useState('');
+    const [maxYear, setMaxYear] = useState('');
+    const [page, setPage] = useState(1);
+
+    const toast = useToast();
+
+    const handleSearch = async (page = 1) => {
+        try {
+
+            const queryParams = {
+                'page': page,
+            };
+
+            if (team1Substring) {
+                queryParams['name-or-abbreviation1'] = team1Substring;
+            }
+
+            if (team2Substring) {
+                queryParams['name-or-abbreviation2'] = team2Substring;
+            }
+
+            if (minPts) {
+                queryParams['min-pts'] = minPts;
+            }
+
+            if (minYear) {
+                queryParams['min-year'] = minYear;
+            }
+
+            if (maxYear) {
+                queryParams['max-year'] = maxYear;
+            }
+
+            console.log(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/game/search`)
+            const response = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/game/search`, {
+                params: queryParams,
+            });
+            setGameData(response.data);
+            setPage(page);
+        } catch (error) {
+            console.log(error);
+            toast({
+                title: 'Error',
+                description: 'An error occurred during the search. Please try again.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
 
     useEffect(() => {
-        async function fetchData() {
-            try {
-                console.log("here");
-                console.log(`${process.env.EXPRESS_APP_API_URL}/game/${game_id}`);
-                const gameRes = await axios.get(`${process.env.EXPRESS_APP_API_URL}/game/${game_id}`);
-                setGameData(gameRes.data);
+        handleSearch(1);
+    }, []);
 
-                const gamePlayersRes = await axios.get(`${process.env.EXPRESS_APP_API_URL}/game/${game_id}/players`);
-                setGamePlayers(gamePlayersRes.data);
-
-                const gameBettingRes = await axios.get(`${process.env.EXPRESS_APP_API_URL}/game/${game_id}/betting`);
-                setGameBetting(gameBettingRes.data);
-            } catch (err) {
-                console.error(err);
-            }
+    const handlePrevPage = () => {
+        if (page > 1) {
+            handleSearch(page - 1);
         }
+    };
 
-        fetchData();
-    }, [game_id]);
+    const handleNextPage = () => {
+        handleSearch(page + 1);
+    };
 
     return (
         <VStack spacing={6}>
-            <Heading as="h1">Game Information</Heading>
-
-            <Box w="100%">
-                <Text fontSize="xl" fontWeight="bold">
-                    Game Data
-                </Text>
-                <Table variant="simple">
-                    <Thead>
-                        <Tr>
-                            <Th>Team</Th>
-                            <Th>Points</Th>
-                            <Th>Matchup</Th>
-                            <Th>Game Date</Th>
-                        </Tr>
-                    </Thead>
-                    <Tbody>
-                        {gameData.map((game, index) => (
-                            <Tr key={index}>
-                                <Td>{game.team_id}</Td>
-                                <Td>{game.pts}</Td>
-                                <Td>{game.matchup}</Td>
-                                <Td>{game.game_date}</Td>
+            <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+                <FormControl>
+                    <FormLabel>Team 1</FormLabel>
+                    <Input
+                        value={team1Substring}
+                        onChange={(e) => setTeam1Substring(e.target.value)}
+                    />
+                </FormControl>
+                <FormControl>
+                    <FormLabel>Team 2</FormLabel>
+                    <Input
+                        value={team2Substring}
+                        onChange={(e) => setTeam2Substring(e.target.value)}
+                    />
+                </FormControl>
+                <FormControl>
+                    <FormLabel>Min Points</FormLabel>
+                    <Input
+                        value={minPts}
+                        onChange={(e) => setMinPts(e.target.value)}
+                    />
+                </FormControl>
+                <FormControl>
+                    <FormLabel>Min Year</FormLabel>
+                    <Input
+                        value={minYear}
+                        onChange={(e) => setMinYear(e.target.value)}
+                    />
+                </FormControl>
+                <FormControl>
+                    <FormLabel>Max Year</FormLabel>
+                    <Input
+                        value={maxYear}
+                        onChange={(e) => setMaxYear(e.target.value)}
+                    />
+                </FormControl>
+            </Grid>
+            <Button onClick={() => handleSearch()} mt={4}>
+                Search
+            </Button>
+            <Table mt={6} variant="simple" width="100%">
+                <Thead>
+                    <Tr>
+                        <Th>Home Team</Th>
+                        <Th>Away Team</Th>
+                        <Th>Home Team Points</Th>
+                        <Th>Away Team Points</Th>
+                        <Th>Season Year</Th>
+                    </Tr>
+                </Thead>
+                <Tbody>
+                    {gameData &&
+                        gameData.map((game) => (
+                            <Tr key={game.game_id}>
+                                <Td fontWeight="bold">{game.home_team_name}</Td>
+                                <Td fontWeight="bold">{game.away_team_name}</Td>
+                                <Td>{game.home_team_pts}</Td>
+                                <Td>{game.away_team_pts}</Td>
+                                <Td>{game.season_year}</Td>
                             </Tr>
                         ))}
-                    </Tbody>
-                </Table>
-            </Box>
-
-            <Box w="100%">
-                <Text fontSize="xl" fontWeight="bold">
-                    Game Players
-                </Text>
-                {gamePlayers.map((teamPlayers, teamIndex) => (
-                    <Box key={teamIndex}>
-                        <Text fontWeight="bold" color={textColor}>
-                            {teamIndex === 0 ? 'Home Team Players' : 'Away Team Players'}
-                        </Text>
-                        <Table variant="simple">
-                            <Thead>
-                                <Tr>
-                                    <Th>Player Name</Th>
-                                    <Th>Position</Th>
-                                    <Th>Points</Th>
-                                    <Th>Rebounds</Th>
-                                    <Th>Assists</Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody>
-                                {teamPlayers.map((player, index) => (
-                                    <Tr key={index}>
-                                        <Td>{player.display_first_last}</Td>
-                                        <Td>{player.pos}</Td>
-                                        <Td>{player.pts}</Td>
-                                        <Td>{player.totReb}</Td>
-                                        <Td>{player.ast}</Td>
-                                    </Tr>
-                                ))}
-                            </Tbody>
-                        </Table>
-                    </Box>
-                ))}
-            </Box>
-
-            <Box w="100%">
-                <Text fontSize="xl" fontWeight="bold">
-                    Betting Data
-                </Text>
-                <Table variant="simple">
-                    <Thead>
-                        <Tr>
-                            <Th>Betting Line</Th>
-                            <Th>Home Team Odds</Th>
-                            <Th>Away Team Odds</Th>
-                            <Th>Over/Under</Th>
-                        </Tr>
-                    </Thead>
-                    <Tbody>
-                        {gameBetting.map((bet, index) => (
-                            <Tr key={index}>
-                                <Td>{bet.betting_line}</Td>
-                                <Td>{bet.home_odds}</Td>
-                                <Td>{bet.away_odds}</Td>
-                                <Td>{bet.over_under}</Td>
-                            </Tr>
-                        ))}
-                    </Tbody>
-                </Table>
-            </Box>
+                </Tbody>
+            </Table>
+            <Flex mt={6} justifyContent="space-between" width="100%">
+                <Button onClick={handlePrevPage} disabled={page <= 1}>
+                    Previous
+                </Button>
+                <Text fontWeight="bold">Page {page}</Text>
+                <Button onClick={handleNextPage}>
+                    Next
+                </Button>
+            </Flex>
+            <GameCard />
         </VStack>
     );
 };
 
 export default GamePage;
-

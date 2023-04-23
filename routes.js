@@ -425,8 +425,6 @@ GROUP BY gwd.team_id;
     );
 };
 
-
-
 // trivia page
 
 const middling_total_betting = async function (req, res) {
@@ -510,6 +508,10 @@ const game_search = async function (req, res) {
     let min_pts = req.query['min-pts'];
     let min_year = req.query['min-year'];
     let max_year = req.query['max-year'];
+    let page = parseInt(req.query['page']) || 1;
+    let resultsPerPage = 20;
+    let offset = (page - 1) * resultsPerPage;
+
     connection.query(
         `WITH potential_team1_by_name AS (
     SELECT team_id
@@ -521,16 +523,18 @@ const game_search = async function (req, res) {
     WHERE (name LIKE '%%') OR (abbreviation LIKE '%${team2_substring}%')
 )
 SELECT g1.game_id, g1.team_id as home_team_id, g1.a_team_id as away_team_id, t.name as home_team_name, t2.name as away_team_name,
-       t.abbreviation as home_team_abbreviation, t2.abbreviation as away_team_abbreviation, g1.pts as home_team_pts
+       t.abbreviation as home_team_abbreviation, t2.abbreviation as away_team_abbreviation, g1.pts as home_team_pts,
        g2.pts as away_team_pts, g1.season_year as season_year
 FROM game_data g1
 JOIN game_data g2 ON g1.a_team_id = g2.team_id AND g1.game_id = g2.game_id
 JOIN teams t on g1.team_id = t.team_id
 JOIN teams t2 on g2.team_id = t2.team_id
 WHERE g1.team_id IN (SELECT * FROM potential_team1_by_name) AND g2.team_id IN (SELECT * FROM potential_team2_by_name)
-  AND ((g1.pts + g2.pts) >= COALESCE(${min_pts}, 0))
-  AND ((g1.season_year >= COALESCE(${min_year}, 0)) OR (${min_year} IS NULL))
-  AND ((g1.season_year <= COALESCE(${max_year}, g1.season_year)) OR (${max_year} IS NULL));`,
+  AND ((g1.pts + g2.pts) >= COALESCE(?, 0))
+  AND ((g1.season_year >= COALESCE(?, 0)) OR (? IS NULL))
+  AND ((g1.season_year <= COALESCE(?, g1.season_year)) OR (? IS NULL))
+LIMIT ? OFFSET ?;`,
+        [min_pts, min_year, min_year, max_year, max_year, resultsPerPage, offset],
         (err, data) => {
             if (err || data.length === 0) {
                 console.log(err);
@@ -540,9 +544,10 @@ WHERE g1.team_id IN (SELECT * FROM potential_team1_by_name) AND g2.team_id IN (S
         }
     )
 }
+
+
 const team_underdog_winrate = async function (req, res) {
-    connection.query(
-        `WITH underdog_win_games AS (
+    connection.query(`WITH underdog_win_games AS (
    SELECT G.team_id, B.game_id, (-1*AVG(moneyline_price1)) as avg_moneyline_win, COUNT(*) as num_wins
    FROM betting_data B, game_data G
    WHERE B.game_id = G.game_id
