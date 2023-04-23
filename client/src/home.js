@@ -11,7 +11,7 @@ import {
     Container,
     VStack,
     useColorModeValue,
-    extendTheme,
+    extendTheme, Center,
 } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { ChakraProvider } from '@chakra-ui/react';
@@ -39,13 +39,16 @@ const HomePage = () => {
     return (
         <ChakraProvider theme={theme}>
             <ColorModeScript initialColorMode="light" />
-            <Container maxW="80%" py={12}>
+            <Center>
+            <Container maxW="100%" py={12}>
+                <Center>
+                    <VStack>
                 <Box pos="relative" display="inline-block">
                     <Heading as="h1" size="2xl" background={titleGradient} color="transparent" backgroundClip="text">
-                        Sports Statistics
+                        Basketball Betting Statistics
                     </Heading>
                 </Box>
-                <VStack spacing={16} align="start">
+                <VStack spacing={16} align="start" width="100%">
                     <Tabs mt={4}>
                         <TabList>
                             <Tab>Game</Tab>
@@ -80,7 +83,10 @@ const HomePage = () => {
                         </TabPanels>
                     </Tabs>
                 </VStack>
+                    </VStack>
+                </Center>
             </Container>
+            </Center>
         </ChakraProvider>
     );
 };

@@ -516,11 +516,11 @@ const game_search = async function (req, res) {
         `WITH potential_team1_by_name AS (
     SELECT team_id
     FROM teams
-    WHERE (name LIKE '%%') OR (abbreviation LIKE '%${team1_substring}%')
+    WHERE (name LIKE '%${team1_substring}%') OR (abbreviation LIKE '%${team1_substring}%')
 ), potential_team2_by_name AS (
     SELECT team_id
     FROM teams
-    WHERE (name LIKE '%%') OR (abbreviation LIKE '%${team2_substring}%')
+    WHERE (name LIKE '%${team1_substring}%') OR (abbreviation LIKE '%${team2_substring}%')
 )
 SELECT g1.game_id, g1.team_id as home_team_id, g1.a_team_id as away_team_id, t.name as home_team_name, t2.name as away_team_name,
        t.abbreviation as home_team_abbreviation, t2.abbreviation as away_team_abbreviation, g1.pts as home_team_pts,
