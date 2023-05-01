@@ -182,25 +182,80 @@ const player_average_stats = async function (req, res) {
     GET /player/:player_id/spread_performance
     Returns num games the player covered the spread, total games, and percentage of games the player covered the spread
  */
+const player_underdog = async function (req, res) {
+  connection.query(
+    `
+    SELECT P.player_id, P2.display_first_last, P.total_games, P.total_money, P.total_money / P.total_games AS money_per_game
+    FROM (
+        SELECT person_id, display_first_last
+        FROM players
+    ) P2 JOIN (
+        SELECT P.player_id, COUNT(P.game_id) AS total_games,
+               SUM(IF(G.wl = 'W', IF(P.moneyline_price1 > 0, P.moneyline_price1, P.moneyline_price2), -100)) AS total_money
+        FROM (
+            SELECT game_id, team_id,  wl
+            FROM game_data
+        ) G JOIN (
+            SELECT P.team_id, P.game_id, P.player_id, B.moneyline_price1, B.moneyline_price2
+            FROM (
+                SELECT team_id, game_id, player_id
+                FROM player_stats
+                WHERE player_id=${player_id}
+            ) P JOIN (
+                SELECT game_id, team_id, a_team_id, moneyline_price1, moneyline_price2
+                FROM betting_data
+                WHERE moneyline_price1 > 0 OR moneyline_price2 > 0
+            ) B ON P.game_id = B.game_id AND
+                   ((P.team_id = B.team_id AND B.moneyline_price1 > 0) OR (P.team_id = B.a_team_id AND B.moneyline_price2 > 0))
+        ) P ON P.team_id = G.team_id AND P.game_id = G.game_id
+        GROUP BY P.player_id
+    ) P ON P.player_id = P2.person_id
+`,
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
+};
+
 const player_spread_performance = async function (req, res) {
   connection.query(
     `
-        WITH total_games AS (
-   SELECT P.player_id, COUNT(*) AS total_games
-   FROM player_stats P
-   GROUP BY P.player_id
-)
-SELECT P.player_id, COUNT(DISTINCT B.game_id) AS count, TG.total_games, COUNT(DISTINCT B.game_id) / TG.total_games AS spread_percentage
-FROM betting_data B JOIN game_data G ON B.game_id = G.game_id AND B.team_id = G.team_id
-   JOIN game_data G2 ON B.game_id = G2.game_id AND B.a_team_id = G2.team_id
-   JOIN player_stats P on B.game_id = P.game_id
-   JOIN total_games TG on P.player_id = TG.player_id
-WHERE ((P.team_id = B.team_id AND (G.pts - G2.pts) > -1 * B.spread1)
-   OR (P.team_id = B.a_team_id AND (G2.pts - G.pts) > -1 * B.spread2))
-   AND TG.total_games > 100
-    AND P.player_id = ${req.params.player_id}
-GROUP BY P.player_id
-ORDER BY COUNT(DISTINCT B.game_id) / TG.total_games DESC;
+    WITH total_games AS (
+      SELECT P.player_id, COUNT(*) AS total_games
+      FROM player_stats P
+      WHERE P.player_id = ${player_id}
+      GROUP BY P.player_id
+  ), pts_difference AS (
+      SELECT G1.pts - G2.pts AS pts_difference, G2.pts - G1.pts AS pts_difference2, G1.game_id
+      FROM game_data G1 JOIN game_data G2 on G1.game_id = G2.game_id AND G1.a_team_id = G2.team_id
+      WHERE G1.is_home = 'f'
+  ), spread_covers1 AS (
+      SELECT COUNT(B.game_id) AS count, PS.player_id
+      FROM player_stats PS JOIN (
+          SELECT DISTINCT B.game_id, B.team_id
+          FROM betting_data B JOIN pts_difference G ON B.game_id = G.game_id AND pts_difference2 < B.spread1
+      ) B ON PS.team_id = B.team_id AND PS.game_id = B.game_id
+      WHERE PS.player_id = ${player_id}
+      GROUP BY PS.player_id
+  ), spread_covers2 AS (
+      SELECT COUNT(B.game_id) AS count, PS.player_id
+      FROM player_stats PS JOIN (
+          SELECT DISTINCT B.game_id, B.a_team_id
+          FROM betting_data B JOIN pts_difference G ON B.game_id = G.game_id AND pts_difference < B.spread2
+      ) B ON PS.team_id = B.a_team_id AND PS.game_id = B.game_id
+      WHERE PS.player_id = ${player_id}
+      GROUP BY PS.player_id
+  )
+  SELECT P.person_id, P.display_first_last, S1.count + S2.count AS count, TG.total_games,
+         (S1.count + S2.count) / TG.total_games AS spread_percentage
+  FROM total_games TG JOIN spread_covers1 S1 ON TG.player_id = S1.player_id
+      JOIN spread_covers2 S2 ON TG.player_id = S2.player_id
+      JOIN players P ON TG.player_id = P.person_id;
 `,
     (err, data) => {
       if (err || data.length === 0) {
@@ -529,7 +584,7 @@ const player_search = async function (req, res) {
   let resultsPerPage = 20;
   let offset = (page - 1) * resultsPerPage;
   connection.query(
-    `SELECT person_id, display_first_last, from_year, to_year, draft_year, height_feet, height_inches, weight, team_id, jersey, school, country, AVG(fgm) as fgm, AVG(fga) as fga, avg(fg_pct) as fg_pct, avg(fg3m) as fg3m, avg(fg3a) as fg3a, avg(fg_pct) as fg3_pct, avg(ftm) as ftm, avg(ft_pct) as ft_pct, avg(oreb) as oreb, avg(dreb) as dreb, avg(reb) as reb, avg(ast) as ast, avg(stl) as stl, avg(blk) as blk, avg(tov) as tov, avg(pf) as pf, avg(pts) as pts
+    `SELECT person_id, display_first_last, from_year, to_year, draft_year, height_feet, height_inches, weight, team_id, jersey, school, country, AVG(fgm) as fgm, AVG(fga) as fga, avg(fg_pct) as fg_pct, avg(fg3m) as fg3m, avg(fg3a) as fg3a, avg(fg_pct) as fg3_pct, avg(ftm) as ftm, AVG(fta) as fta, avg(ft_pct) as ft_pct, avg(oreb) as oreb, avg(dreb) as dreb, avg(reb) as reb, avg(ast) as ast, avg(stl) as stl, avg(blk) as blk, avg(tov) as tov, avg(pf) as pf, avg(pts) as pts, AVG(min) as min
 FROM player_stats ps
     JOIN players p on ps.player_id = p.person_id
 WHERE LOWER(p.display_first_last) LIKE LOWER('%${name_substring}%')
@@ -688,6 +743,7 @@ module.exports = {
   player_information,
   player_average_stats,
   player_spread_performance,
+  player_underdog,
   matchup_stats,
   matchup_top_pairs,
   team,
