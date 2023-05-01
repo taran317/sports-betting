@@ -87,7 +87,7 @@ const GameCard = ({ gameId: propGameId}) => {
             {/*        Update*/}
             {/*    </Button>*/}
             {/*</HStack>*/}
-            {propGameId && gameData && gameData[0] && gameData[1] && (
+            {localGameId && gameData && gameData[0] && gameData[1] && (
                 <Box
                     borderWidth="1px"
                     borderRadius="lg"
