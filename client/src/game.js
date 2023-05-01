@@ -12,7 +12,7 @@ import {
     useToast, Tbody, Table, Thead, Th, Tr, Td, Flex, Center,
     useColorModeValue, IconButton
 } from '@chakra-ui/react';
-import { FiArrowDownCircle } from 'react-icons/fi';
+import { FiArrowDownCircle, FiArrowUpCircle } from 'react-icons/fi';
 import axios from 'axios';
 import GameCard from './gamecard';
 
@@ -28,7 +28,7 @@ const GamePage = () => {
     const [selectedGameId, setSelectedGameId] = useState(null);
     const hoverBgColor = useColorModeValue('gray.200', 'gray.700');
     const gameCardRef = useRef(null);
-
+    const [showUpArrow, setShowUpArrow] = useState(false);
 
     const toast = useToast();
 
@@ -37,6 +37,25 @@ const GamePage = () => {
             gameCardRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     };
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleScroll = () => {
+        if (gameCardRef.current && window.scrollY >= gameCardRef.current.offsetTop) {
+            setShowUpArrow(true);
+        } else {
+            setShowUpArrow(false);
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
 
     const handleSearch = async (page = 1) => {
         try {
@@ -118,7 +137,8 @@ const GamePage = () => {
     };
 
     return (
-        <Flex direction="row">
+        <Box width="100%">
+        <Flex direction="row" width="100%">
         <VStack spacing={6}>
             <form onSubmit={handleSubmit}>
             <Grid templateColumns="repeat(3, 1fr)" gap={4}>
@@ -209,17 +229,31 @@ const GamePage = () => {
                     <GameCard gameId={selectedGameId} />
                 </div>
             </Box>
+            {showUpArrow && (
+                <IconButton
+                    position="fixed"
+                    bottom="4.5rem"
+                    right="2rem"
+                    colorScheme="teal"
+                    icon={<FiArrowUpCircle />}
+                    onClick={scrollToTop}
+                    zIndex="10"
+                />
+            )}
+            {!showUpArrow && (
+                <IconButton
+                    position="fixed"
+                    bottom="2rem"
+                    right="2rem"
+                    colorScheme="teal"
+                    icon={<FiArrowDownCircle />}
+                    onClick={scrollToGameCard}
+                    zIndex="10"
+                />
+            )}
         </VStack>
-            <IconButton
-                position="fixed"
-                bottom="2rem"
-                right="2rem"
-                colorScheme="teal"
-                icon={<FiArrowDownCircle />}
-                onClick={scrollToGameCard}
-                zIndex="10"
-            />
         </Flex>
+        </Box>
     );
 };
 
