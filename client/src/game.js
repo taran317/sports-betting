@@ -164,9 +164,9 @@ const GamePage = () => {
                     <Tr>
                         <Th>Home Team</Th>
                         <Th>Away Team</Th>
-                        <Th>Home Team Points</Th>
-                        <Th>Away Team Points</Th>
-                        <Th>Season Year</Th>
+                        <Th>Home Score</Th>
+                        <Th>Away Score</Th>
+                        <Th>Game Date</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
@@ -182,7 +182,7 @@ const GamePage = () => {
                                 <Td fontWeight="bold">{game.away_team_name}</Td>
                                 <Td>{game.home_team_pts}</Td>
                                 <Td>{game.away_team_pts}</Td>
-                                <Td>{game.season_year}</Td>
+                                <Td>{game.game_date.substring(0, 10)}</Td>
                             </Tr>
                         ))}
                 </Tbody>

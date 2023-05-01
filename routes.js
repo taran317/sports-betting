@@ -607,7 +607,7 @@ const game_search = async function (req, res) {
 )
 SELECT g1.game_id, g1.team_id as home_team_id, g1.a_team_id as away_team_id, t.name as home_team_name, t2.name as away_team_name,
        t.abbreviation as home_team_abbreviation, t2.abbreviation as away_team_abbreviation, g1.pts as home_team_pts,
-       g2.pts as away_team_pts, g1.season_year as season_year
+       g2.pts as away_team_pts, g1.season_year as season_year, g1.game_date
 FROM game_data g1
 JOIN game_data g2 ON g1.a_team_id = g2.team_id AND g1.game_id = g2.game_id
 JOIN teams t on g1.team_id = t.team_id
@@ -616,7 +616,7 @@ WHERE g1.team_id IN (SELECT * FROM potential_team1_by_name) AND g2.team_id IN (S
   AND ((g1.pts + g2.pts) >= COALESCE(?, 0))
   AND ((g1.season_year >= COALESCE(?, 0)) OR (? IS NULL))
   AND ((g1.season_year <= COALESCE(?, g1.season_year)) OR (? IS NULL)) GROUP BY g1.game_id
-ORDER BY g1.season_year DESC
+ORDER BY g1.game_date DESC
 LIMIT ? OFFSET ?;`,
         [min_pts, min_year, min_year, max_year, max_year, resultsPerPage, offset],
         (err, data) => {
