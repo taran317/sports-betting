@@ -20,6 +20,7 @@ import GamePage from './game';
 import TeamPage from './team';
 import { IconButton, useColorMode } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
+import PlayerPage from './player';
 
 
 const theme = extendTheme({
@@ -82,14 +83,7 @@ const HomePage = () => {
                                 <GamePage />
                             </TabPanel>
                             <TabPanel>
-                                <Button
-                                    mt={2}
-                                    colorScheme={buttonColor}
-                                    as={RouterLink}
-                                    to="/player"
-                                >
-                                    Explore Players
-                                </Button>
+                                <PlayerPage />
                             </TabPanel>
                             <TabPanel>
                                 <TeamPage />
