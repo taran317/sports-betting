@@ -1,15 +1,15 @@
 const mysql = require("mysql");
 const config = require("./config.json");
-const {query} = require("express");
+const { query } = require("express");
 
 // Creates MySQL connection using database credential provided in config.json
 // Do not edit. If the connection fails, make sure to check that config.json is filled out correctly
 const connection = mysql.createConnection({
-    host: config.rds_host,
-    user: config.rds_user,
-    password: config.rds_password,
-    port: config.rds_port,
-    database: config.rds_db,
+  host: config.rds_host,
+  user: config.rds_user,
+  password: config.rds_password,
+  port: config.rds_port,
+  database: config.rds_db,
 });
 connection.connect((err) => err && console.log(err));
 
@@ -18,120 +18,120 @@ connection.connect((err) => err && console.log(err));
 // GET /game/:game_id
 // list of 2 outputs: home team first, road team second
 const game = async function (req, res) {
-    connection.query(
-        `
+  connection.query(
+    `
         SELECT *
         FROM game_data G
         JOIN teams T ON G.team_id = T.team_id
         WHERE G.game_id=${req.params.game_id}
     `,
-        (err, data) => {
-            if (err || data.length < 2) {
-                console.log(err);
-                res.json({});
-            } else {
-                if (data[0].is_home === "f") {
-                    temp = data[0];
-                    data[0] = data[1];
-                    data[1] = temp;
-                }
-                return res.json(data);
-            }
+    (err, data) => {
+      if (err || data.length < 2) {
+        console.log(err);
+        res.json({});
+      } else {
+        if (data[0].is_home === "f") {
+          temp = data[0];
+          data[0] = data[1];
+          data[1] = temp;
         }
-    );
+        return res.json(data);
+      }
+    }
+  );
 };
 
 // GET /game_players/:game_id
 // list of 2 lists: home players first, road players second
 const game_players = async function (req, res) {
-    connection.query(
-        `
+  connection.query(
+    `
         SELECT P.display_first_last, G.is_home, PS.*
         FROM players P JOIN player_stats PS on P.person_id = PS.player_id
             JOIN game_data G ON PS.game_id = G.game_id AND PS.team_id = G.team_id
         WHERE PS.game_id = ${req.params.game_id}
         ORDER BY PS.min DESC;
     `,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                output = [[], []];
-                for (i = 0; i < data.length; i++) {
-                    if (data[i].is_home === "t") {
-                        output[0].push(data[i]);
-                    } else {
-                        output[1].push(data[i]);
-                    }
-                }
-                res.json(output);
-            }
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        output = [[], []];
+        for (i = 0; i < data.length; i++) {
+          if (data[i].is_home === "t") {
+            output[0].push(data[i]);
+          } else {
+            output[1].push(data[i]);
+          }
         }
-    );
+        res.json(output);
+      }
+    }
+  );
 };
 
 // GET /game_betting/:game_id
 const game_betting = async function (req, res) {
-    connection.query(
-        `
+  connection.query(
+    `
         SELECT *
         FROM betting_data
         WHERE game_id = ${req.params.game_id};
     `,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 // GET /games_for_team/:team_id
 // Fetches game_id, matchup, and game_date for specific team_id
 // Ordered by game_date
 const games_for_team = async function (req, res) {
-    connection.query(
-        `
+  connection.query(
+    `
         SELECT G.game_id, G.matchup, G.game_date, G.team_id, G.a_team_id
         FROM game_data G
         WHERE team_id = ${req.params.team_id}
         ORDER BY G.game_date;
     `,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 // GET /games_for_player/:player_id
 // Fetches game_id, matchup, game date, and stats for specific player_id
 // Ordered by game_date
 const games_for_player = async function (req, res) {
-    connection.query(
-        `
+  connection.query(
+    `
         SELECT G.matchup, G.game_date, PS.*
         FROM game_data G JOIN player_stats PS on G.game_id = PS.game_id and G.team_id = PS.team_id
         WHERE player_id = ${req.params.player_id}
         ORDER BY G.game_date;
     `,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 /*
@@ -139,21 +139,21 @@ const games_for_player = async function (req, res) {
     Returns player information for specific player_id
 */
 const player_information = async function (req, res) {
-    connection.query(
-        `
+  connection.query(
+    `
         SELECT *
         FROM players
         WHERE person_id = ${req.params.player_id};
     `,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 /*
@@ -161,21 +161,21 @@ const player_information = async function (req, res) {
     Returns average stats for specific player_id
 */
 const player_average_stats = async function (req, res) {
-    connection.query(
-        `
+  connection.query(
+    `
         SELECT AVG(min) as min, AVG(fgm) as fgm, AVG(fga) as fga, AVG(fg_pct) as fg_pct, AVG(fg3m) as fg3m, AVG(fg3a) as fg3a, AVG(fg3_pct) as fg3_pct, AVG(ftm) as ftm, AVG(fta) as fta, AVG(ft_pct) as ft_pct, AVG(oreb) as oreb, AVG(dreb) as dreb, AVG(reb) as reb, AVG(ast) as ast, AVG(stl) as stl, AVG(blk) as blk, AVG(tov) as tov, AVG(pf) as pf, AVG(pts) as pts, AVG(plus_minus) as plus_minus
         FROM player_stats
         WHERE player_id = ${req.params.player_id};
     `,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 /*
@@ -183,8 +183,8 @@ const player_average_stats = async function (req, res) {
     Returns num games the player covered the spread, total games, and percentage of games the player covered the spread
  */
 const player_spread_performance = async function (req, res) {
-    connection.query(
-        `
+  connection.query(
+    `
         WITH total_games AS (
    SELECT P.player_id, COUNT(*) AS total_games
    FROM player_stats P
@@ -202,21 +202,21 @@ WHERE ((P.team_id = B.team_id AND (G.pts - G2.pts) > -1 * B.spread1)
 GROUP BY P.player_id
 ORDER BY COUNT(DISTINCT B.game_id) / TG.total_games DESC;
 `,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 // TODO: Add the query into the function
 const matchup_stats = async function (req, res) {
-    connection.query(
-        `WITH win_loss AS (
+  connection.query(
+    `WITH win_loss AS (
             SELECT SUM(IF(G.wl = 'W', 1, 0)) AS team1_wins, SUM(IF(G.wl = 'L', 1, 0)) AS team2_wins,
                    AVG(G.pts) AS avg_pts_team1, AVG(G2.pts) AS avg_pts_team2, COUNT(DISTINCT G.game_id) AS total_games
             FROM game_data G JOIN game_data G2 ON G.game_id = G2.game_id AND G.a_team_id = G2.team_id
@@ -265,19 +265,20 @@ const matchup_stats = async function (req, res) {
         )
         SELECT *
         FROM win_loss, betting_averages, advanced_betting_stats;`,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 const matchup_top_pairs = async function (req, res) {
-    connection.query(`
+  connection.query(
+    `
     WITH total_games AS (
         SELECT PS1.player_id AS id1, PS2.player_id AS id2, COUNT(DISTINCT PS1.game_id) AS total_games
         FROM player_stats PS1 JOIN player_stats PS2 ON PS1.game_id = PS2.game_id AND PS1.team_id <> PS2.team_id
@@ -299,39 +300,41 @@ const matchup_top_pairs = async function (req, res) {
     GROUP BY PS1.player_id, PS2.player_id
     ORDER BY AVG((PS1.pts + PS2.pts) / (G1.pts + G2.pts)) DESC
     LIMIT 25;
-    `, (err, data) => {
-        if (err || data.length === 0) {
-            console.log(err);
-            res.json({});
-        } else {
-            res.json(data);
-        }
-    });
-}
+    `,
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
+};
 
 const team = async function (req, res) {
-    let team1ID = req.params.team_id;
-    connection.query(
-        `WITH unique_games_avg AS (
+  let team1ID = req.params.team_id;
+  connection.query(
+    `WITH unique_games_avg AS (
             SELECT team_id, SUM(IF(wl = 'W', 1, 0)) as number_wins, SUM(IF(wl = 'L', 1, 0)) as number_losses, AVG(pts) as avg_points, AVG(reb) as avg_rebounds, AVG(ast) as avg_assists
             FROM game_data GROUP BY team_id
         ) SELECT name, abbreviation, teams.team_id, number_wins, number_losses, avg_points, avg_rebounds, avg_assists, min_year, max_year
         FROM unique_games_avg JOIN teams ON unique_games_avg.team_id = teams.team_id WHERE teams.team_id = ${team1ID};`,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 const team_game_betting_data = async function (req, res) {
-    let team1ID = req.params.team_id;
-    connection.query(
-        `SELECT book_name, AVG(moneyline) AS avg_moneyline_price, AVG(spread) AS avg_spread, AVG(total1) AS avg_total
+  let team1ID = req.params.team_id;
+  connection.query(
+    `SELECT book_name, AVG(moneyline) AS avg_moneyline_price, AVG(spread) AS avg_spread, AVG(total1) AS avg_total
         FROM (
         SELECT book_name, moneyline_price1 AS moneyline, spread1 AS spread, total1
         FROM betting_data
@@ -342,21 +345,21 @@ const team_game_betting_data = async function (req, res) {
         WHERE a_team_id = ${team1ID}
         ) T
         GROUP BY book_name;`,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 const team_underdog_wins = async function (req, res) {
-    let team1ID = req.params.team_id;
-    connection.query(
-        `WITH total_underdog_games AS (
+  let team1ID = req.params.team_id;
+  connection.query(
+    `WITH total_underdog_games AS (
             SELECT G.team_id, COUNT(DISTINCT B.game_id) AS total_games
             FROM betting_data B JOIN game_data G on B.game_id = G.game_id
             WHERE (B.team_id = G.team_id AND B.moneyline_price1 > 0)
@@ -374,21 +377,21 @@ const team_underdog_wins = async function (req, res) {
             AND T2.team_id = T.team_id
             AND T.team_id = ${team1ID}
         GROUP BY T.team_id;`,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 const team_underdog_money = async function (req, res) {
-    let team1ID = req.params.team_id;
-    connection.query(
-        `WITH total_underdog_games AS (
+  let team1ID = req.params.team_id;
+  connection.query(
+    `WITH total_underdog_games AS (
             SELECT G.team_id, COUNT(DISTINCT B.game_id) AS total_games
             FROM betting_data B JOIN game_data G on B.game_id = G.game_id
             WHERE ((B.team_id = G.team_id AND B.moneyline_price1 > 0)
@@ -407,22 +410,22 @@ const team_underdog_money = async function (req, res) {
             AND T.team_id = ${team1ID}
             AND B.book_name = '5Dimes'
         GROUP BY T.team_id`,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 const team_top_players = async function (req, res) {
-    let team_id = req.params.team_id;
-    let num_players = req.query.num_players;
-    connection.query(
-        `
+  let team_id = req.params.team_id;
+  let num_players = req.query.num_players;
+  connection.query(
+    `
         WITH player_stats_avg AS (
     SELECT player_id, team_id, AVG(pts) as avg_pts, AVG(ast) as avg_ast, AVG(reb) as avg_reb, AVG(stl) as avg_stl, AVG(blk) as avg_blk, AVG(min) as avg_min
     FROM player_stats
@@ -433,23 +436,22 @@ SELECT player_id, display_first_last, avg_pts, avg_ast, avg_reb, avg_pts + avg_a
 FROM players P JOIN player_stats_avg PSA on P.person_id = PSA.player_id
 WHERE team_id = ${team_id}
 ORDER BY avg_PRA DESC
-LIMIT ${num_players}`
-    ,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+LIMIT ${num_players}`,
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 const team_spread_covering_percentage = async function (req, res) {
-    let team_id = req.params.team_id;
-    connection.query(
-        `
+  let team_id = req.params.team_id;
+  connection.query(
+    `
         WITH total_games AS (
             SELECT team_id, COUNT(*) AS total_games
             FROM game_data
@@ -466,23 +468,23 @@ const team_spread_covering_percentage = async function (req, res) {
         GROUP BY T.team_id
         ORDER BY COUNT(DISTINCT B.game_id) / TG.total_games DESC;
     `,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-                res.json({});
-            } else {
-                res.json(data);
-            }
-        }
-    );
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+        res.json({});
+      } else {
+        res.json(data);
+      }
+    }
+  );
 };
 
 // trivia page
 
 const middling_total_betting = async function (req, res) {
-    let threshold = req.query.threshold;
-    connection.query(
-        `SELECT SUM(IF(G1.pts + G2.pts > B1.total1, 10000 / ABS(B1.total_price1), IF(G1.pts + G2.pts = B1.total1, 0, -100)))
+  let threshold = req.query.threshold;
+  connection.query(
+    `SELECT SUM(IF(G1.pts + G2.pts > B1.total1, 10000 / ABS(B1.total_price1), IF(G1.pts + G2.pts = B1.total1, 0, -100)))
         + SUM(IF(G1.pts + G2.pts < B2.total1, 10000 / ABS(B2.total_price1), IF(G1.pts + G2.pts = B2.total1, 0, -100))) AS middle_total_money,
         SUM(IF(G1.pts + G2.pts > B1.total1 AND G1.pts + G2.pts < B2.total1, 1, 0)) AS middles_total_won,
         SUM(IF(G1.pts + G2.pts > B1.total1 AND G1.pts + G2.pts < B2.total1, 0, 1)) AS middles_total_lost
@@ -490,20 +492,20 @@ const middling_total_betting = async function (req, res) {
         JOIN game_data G1 ON B1.game_id = G1.game_id AND B1.team_id = G1.team_id
         JOIN game_data G2 ON B1.game_id = G2.game_id AND B1.a_team_id = G2.team_id
         WHERE B1.total1 <= B2.total1 - ${threshold};`,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-            } else {
-                res.json(data);
-            }
-        }
-    )
-}
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+      } else {
+        res.json(data);
+      }
+    }
+  );
+};
 
 const middling_spread_betting = async function (req, res) {
-    let threshold = req.query.threshold;
-    connection.query(
-        `SELECT SUM(IF(G1.pts + G2.pts > B1.total1, 10000 / ABS(B1.total_price1), IF(G1.pts + G2.pts = B1.total1, 0, -100)))
+  let threshold = req.query.threshold;
+  connection.query(
+    `SELECT SUM(IF(G1.pts + G2.pts > B1.total1, 10000 / ABS(B1.total_price1), IF(G1.pts + G2.pts = B1.total1, 0, -100)))
         + SUM(IF(G1.pts + G2.pts < B2.total1, 10000 / ABS(B2.total_price1), IF(G1.pts + G2.pts = B2.total1, 0, -100))) AS middle_total_money,
         SUM(IF(G1.pts + G2.pts > B1.total1 AND G1.pts + G2.pts < B2.total1, 1, 0)) AS middles_total_won,
         SUM(IF(G1.pts + G2.pts > B1.total1 AND G1.pts + G2.pts < B2.total1, 0, 1)) AS middles_total_lost
@@ -511,91 +513,98 @@ const middling_spread_betting = async function (req, res) {
         JOIN game_data G1 ON B1.game_id = G1.game_id AND B1.team_id = G1.team_id
         JOIN game_data G2 ON B1.game_id = G2.game_id AND B1.a_team_id = G2.team_id
         WHERE B1.total1 <= B2.total1 - ${threshold};`,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-            } else {
-                res.json(data);
-            }
-        }
-    )
-}
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+      } else {
+        res.json(data);
+      }
+    }
+  );
+};
 
 const player_search = async function (req, res) {
-    let name_substring = req.query.name;
-
-    connection.query(
-        `SELECT from_year, to_year, draft_year, height_feet, height_inches, weight, team_id, jersey, school, country, AVG(fgm) as fgm, AVG(fga) as fga, avg(fg_pct) as fg_pct, avg(fg3m) as fg3m, avg(fg3a) as fg3a, avg(fg_pct) as fg3_pct, avg(ftm) as ftm, avg(ft_pct) as ft_pct, avg(oreb) as oreb, avg(dreb) as dreb, avg(reb) as reb, avg(ast) as ast, avg(stl) as stl, avg(blk) as blk, avg(tov) as tov, avg(pf) as pf
+  let name_substring = req.query.name;
+  connection.query(
+    `SELECT person_id, display_first_last, from_year, to_year, draft_year, height_feet, height_inches, weight, team_id, jersey, school, country, AVG(fgm) as fgm, AVG(fga) as fga, avg(fg_pct) as fg_pct, avg(fg3m) as fg3m, avg(fg3a) as fg3a, avg(fg_pct) as fg3_pct, avg(ftm) as ftm, avg(ft_pct) as ft_pct, avg(oreb) as oreb, avg(dreb) as dreb, avg(reb) as reb, avg(ast) as ast, avg(stl) as stl, avg(blk) as blk, avg(tov) as tov, avg(pf) as pf, avg(pts) as pts
 FROM player_stats ps
     JOIN players p on ps.player_id = p.person_id
 WHERE LOWER(p.display_first_last) LIKE LOWER('%${name_substring}%')
 GROUP BY p.person_id;`,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-            } else {
-                res.json(data);
-            }
-        }
-    )
-}
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+      } else {
+        res.json(data);
+      }
+    }
+  );
+};
+
 const team_search = async function (req, res) {
-    let substring = req.query['name-or-abbreviation'];
-    connection.query(
-        `SELECT * FROM teams
+  let substring = req.query["name-or-abbreviation"];
+  connection.query(
+    `SELECT * FROM teams
          WHERE UPPER(name) LIKE UPPER('%${substring}%')
             OR UPPER(abbreviation) LIKE UPPER('%${substring}%');`,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-            } else {
-                res.json(data);
-            }
-        }
-    )
-}
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+      } else {
+        res.json(data);
+      }
+    }
+  );
+};
 
 const game_search = async function (req, res) {
-    let team1_substring = req.query['name-or-abbreviation1'] ? String(req.query['name-or-abbreviation1']) : null;
-    let team2_substring = req.query['name-or-abbreviation2'] ? String(req.query['name-or-abbreviation2']) : null;
-    let min_pts = req.query['min-pts'];
-    let min_year = req.query['min-year'];
-    let max_year = req.query['max-year'];
-    let page = parseInt(req.query['page']) || 1;
-    let resultsPerPage = 20;
-    let offset = (page - 1) * resultsPerPage;
+  let team1_substring = req.query["name-or-abbreviation1"]
+    ? String(req.query["name-or-abbreviation1"])
+    : null;
+  let team2_substring = req.query["name-or-abbreviation2"]
+    ? String(req.query["name-or-abbreviation2"])
+    : null;
+  let min_pts = req.query["min-pts"];
+  let min_year = req.query["min-year"];
+  let max_year = req.query["max-year"];
+  let page = parseInt(req.query["page"]) || 1;
+  let resultsPerPage = 20;
+  let offset = (page - 1) * resultsPerPage;
 
-    let whereClauseTeam1 = team1_substring ? `WHERE (name LIKE '%${team1_substring}%') OR (abbreviation LIKE '%${team1_substring}%')` : '';
-    let whereClauseTeam2 = team2_substring ? `WHERE (name LIKE '%${team2_substring}%') OR (abbreviation LIKE '%${team2_substring}%')` : '';
+  let whereClauseTeam1 = team1_substring
+    ? `WHERE (name LIKE '%${team1_substring}%') OR (abbreviation LIKE '%${team1_substring}%')`
+    : "";
+  let whereClauseTeam2 = team2_substring
+    ? `WHERE (name LIKE '%${team2_substring}%') OR (abbreviation LIKE '%${team2_substring}%')`
+    : "";
 
-//     const sqlQuery = `WITH potential_team1_by_name AS (
-//     SELECT team_id
-//     FROM teams
-//     ${whereClauseTeam1}
-// ), potential_team2_by_name AS (
-//     SELECT team_id
-//     FROM teams
-//     ${whereClauseTeam2}
-// )
-// SELECT g1.game_id, g1.team_id as home_team_id, g1.a_team_id as away_team_id, t.name as home_team_name, t2.name as away_team_name,
-//        t.abbreviation as home_team_abbreviation, t2.abbreviation as away_team_abbreviation, g1.pts as home_team_pts,
-//        g2.pts as away_team_pts, g1.season_year as season_year
-// FROM game_data g1
-// JOIN game_data g2 ON g1.a_team_id = g2.team_id AND g1.game_id = g2.game_id
-// JOIN teams t on g1.team_id = t.team_id
-// JOIN teams t2 on g2.team_id = t2.team_id
-// WHERE g1.team_id IN (SELECT * FROM potential_team1_by_name) AND g2.team_id IN (SELECT * FROM potential_team2_by_name)
-//   AND ((g1.pts + g2.pts) >= COALESCE(?, 0))
-//   AND ((g1.season_year >= COALESCE(?, 0)) OR (? IS NULL))
-//   AND ((g1.season_year <= COALESCE(?, g1.season_year)) OR (? IS NULL))
-// LIMIT ? OFFSET ?;`;
-//
-//     console.log(`Final SQL Query: ${sqlQuery}`);
-//     console.log('Parameters:', [min_pts, min_year, min_year, max_year, max_year, resultsPerPage, offset]);
+  //     const sqlQuery = `WITH potential_team1_by_name AS (
+  //     SELECT team_id
+  //     FROM teams
+  //     ${whereClauseTeam1}
+  // ), potential_team2_by_name AS (
+  //     SELECT team_id
+  //     FROM teams
+  //     ${whereClauseTeam2}
+  // )
+  // SELECT g1.game_id, g1.team_id as home_team_id, g1.a_team_id as away_team_id, t.name as home_team_name, t2.name as away_team_name,
+  //        t.abbreviation as home_team_abbreviation, t2.abbreviation as away_team_abbreviation, g1.pts as home_team_pts,
+  //        g2.pts as away_team_pts, g1.season_year as season_year
+  // FROM game_data g1
+  // JOIN game_data g2 ON g1.a_team_id = g2.team_id AND g1.game_id = g2.game_id
+  // JOIN teams t on g1.team_id = t.team_id
+  // JOIN teams t2 on g2.team_id = t2.team_id
+  // WHERE g1.team_id IN (SELECT * FROM potential_team1_by_name) AND g2.team_id IN (SELECT * FROM potential_team2_by_name)
+  //   AND ((g1.pts + g2.pts) >= COALESCE(?, 0))
+  //   AND ((g1.season_year >= COALESCE(?, 0)) OR (? IS NULL))
+  //   AND ((g1.season_year <= COALESCE(?, g1.season_year)) OR (? IS NULL))
+  // LIMIT ? OFFSET ?;`;
+  //
+  //     console.log(`Final SQL Query: ${sqlQuery}`);
+  //     console.log('Parameters:', [min_pts, min_year, min_year, max_year, max_year, resultsPerPage, offset]);
 
-
-    connection.query(
-        `WITH potential_team1_by_name AS (
+  connection.query(
+    `WITH potential_team1_by_name AS (
     SELECT team_id
     FROM teams
     ${whereClauseTeam1}
@@ -617,25 +626,23 @@ WHERE g1.team_id IN (SELECT * FROM potential_team1_by_name) AND g2.team_id IN (S
   AND ((g1.season_year <= COALESCE(?, g1.season_year)) OR (? IS NULL)) GROUP BY g1.game_id
 ORDER BY g1.game_date DESC
 LIMIT ? OFFSET ?;`,
-        [min_pts, min_year, min_year, max_year, max_year, resultsPerPage, offset],
-        (err, data) => {
-            if (err) {
-                console.error('Error executing query:', err);
-                res.status(500).json({ error: 'Internal server error' });
-            } else if (data.length === 0) {
-                res.status(404).json({ message: 'No results found' });
-            } else {
-                res.json(data);
-            }
-        }
-
-    )
-}
-
-
+    [min_pts, min_year, min_year, max_year, max_year, resultsPerPage, offset],
+    (err, data) => {
+      if (err) {
+        console.error("Error executing query:", err);
+        res.status(500).json({ error: "Internal server error" });
+      } else if (data.length === 0) {
+        res.status(404).json({ message: "No results found" });
+      } else {
+        res.json(data);
+      }
+    }
+  );
+};
 
 const team_underdog_winrate = async function (req, res) {
-    connection.query(`WITH underdog_win_games AS (
+  connection.query(
+    `WITH underdog_win_games AS (
    SELECT G.team_id, B.game_id, (-1*AVG(moneyline_price1)) as avg_moneyline_win, COUNT(*) as num_wins
    FROM betting_data B, game_data G
    WHERE B.game_id = G.game_id
@@ -657,38 +664,37 @@ SELECT uwg.team_id, (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) as win_pctg
 FROM underdog_win_games uwg
     JOIN underdog_loss_games ulg ON uwg.team_id = ulg.team_id
 ORDER BY expected_moneyline_win_or_loss DESC;`,
-        (err, data) => {
-            if (err || data.length === 0) {
-                console.log(err);
-            } else {
-                res.json(data);
-            }
-        }
-    )
-}
-
+    (err, data) => {
+      if (err || data.length === 0) {
+        console.log(err);
+      } else {
+        res.json(data);
+      }
+    }
+  );
+};
 
 module.exports = {
-    game,
-    game_players,
-    game_betting,
-    games_for_team,
-    games_for_player,
-    player_information,
-    player_average_stats,
-    player_spread_performance,
-    matchup_stats,
-    matchup_top_pairs,
-    team,
-    team_top_players,
-    team_spread_covering_percentage,
-    team_game_betting_data,
-    team_underdog_wins,
-    team_underdog_money,
-    middling_total_betting,
-    middling_spread_betting,
-    player_search,
-    team_search,
-    game_search,
-    team_underdog_winrate
+  game,
+  game_players,
+  game_betting,
+  games_for_team,
+  games_for_player,
+  player_information,
+  player_average_stats,
+  player_spread_performance,
+  matchup_stats,
+  matchup_top_pairs,
+  team,
+  team_top_players,
+  team_spread_covering_percentage,
+  team_game_betting_data,
+  team_underdog_wins,
+  team_underdog_money,
+  middling_total_betting,
+  middling_spread_betting,
+  player_search,
+  team_search,
+  game_search,
+  team_underdog_winrate,
 };
