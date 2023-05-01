@@ -412,7 +412,6 @@ const team_underdog_money = async function (req, res) {
                 console.log(err);
                 res.json({});
             } else {
-                console.log(data);
                 res.json(data);
             }
         }

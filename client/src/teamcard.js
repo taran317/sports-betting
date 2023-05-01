@@ -119,9 +119,9 @@ const TeamCard = ({ teamId }) => {
                                         <Td>{team.abbreviation}</Td>
                                         <Td>{team.number_wins}</Td>
                                         <Td>{team.number_losses}</Td>
-                                        <Td>{team.avg_points}</Td>
-                                        <Td>{team.avg_rebounds}</Td>
-                                        <Td>{team.avg_assists}</Td>
+                                        <Td>{team.avg_points.toFixed(1)}</Td>
+                                        <Td>{team.avg_rebounds.toFixed(1)}</Td>
+                                        <Td>{team.avg_assists.toFixed(1)}</Td>
                                     </Tr>
                                 ))}
                             </Tbody>
@@ -146,9 +146,9 @@ const TeamCard = ({ teamId }) => {
                                         {teamPlayers.map((player, index) => (
                                             <Tr key={index}>
                                                 <Td>{player.display_first_last}</Td>
-                                                <Td>{player.avg_pts}</Td>
-                                                <Td>{player.avg_reb}</Td>
-                                                <Td>{player.avg_ast}</Td>
+                                                <Td>{player.avg_pts.toFixed(1)}</Td>
+                                                <Td>{player.avg_reb.toFixed(1)}</Td>
+                                                <Td>{player.avg_ast.toFixed(1)}</Td>
                                             </Tr>
                                         ))}
                                     </Tbody>
@@ -173,9 +173,9 @@ const TeamCard = ({ teamId }) => {
                                 {teamBetting.map((bet, index) => (
                                     <Tr key={index}>
                                         <Td>{bet.book_name}</Td>
-                                        <Td>{bet.avg_moneyline_price}</Td>
-                                        <Td>{bet.avg_spread}</Td>
-                                        <Td>{bet.avg_total}</Td>
+                                        <Td>{bet.avg_moneyline_price.toFixed(2)}</Td>
+                                        <Td>{bet.avg_spread.toFixed(1)}</Td>
+                                        <Td>{bet.avg_total.toFixed(1)}</Td>
                                     </Tr>
                                 ))}
                             </Tbody>
@@ -203,12 +203,12 @@ const TeamCard = ({ teamId }) => {
                                     <Tr>
                                         <Td>{spreadData[0].total_games}</Td>
                                         <Td>{spreadData[0].count}</Td>
-                                        <Td>{spreadData[0].spread_percentage}</Td>
+                                        <Td>{`${(spreadData[0].spread_percentage * 100).toFixed(1)}%`}</Td>
                                         <Td>{underdogWinData[0].total_games}</Td>
                                         <Td>{underdogWinData[0].count}</Td>
-                                        <Td>{underdogWinData[0].percentage}</Td>
+                                        <Td>{`${(underdogWinData[0].percentage * 100).toFixed(1)}%`}</Td>
                                         <Td>{underdogMoneyData[0].money}</Td>
-                                        <Td>{underdogMoneyData[0].money_per_game}</Td>
+                                        <Td>{underdogMoneyData[0].money_per_game.toFixed(2)}</Td>
                                     </Tr>
                             </Tbody>
                         </Table>
