@@ -140,6 +140,9 @@ const TeamCard = ({ teamId }) => {
                                             <Th>PPG</Th>
                                             <Th>RPG</Th>
                                             <Th>APG</Th>
+                                            <Th>SPG</Th>
+                                            <Th>BPG</Th>
+                                            <Th>MPG</Th>
                                         </Tr>
                                     </Thead>
                                     <Tbody>
@@ -149,6 +152,9 @@ const TeamCard = ({ teamId }) => {
                                                 <Td>{player.avg_pts.toFixed(1)}</Td>
                                                 <Td>{player.avg_reb.toFixed(1)}</Td>
                                                 <Td>{player.avg_ast.toFixed(1)}</Td>
+                                                <Td>{player.avg_stl.toFixed(1)}</Td>
+                                                <Td>{player.avg_blk.toFixed(1)}</Td>
+                                                <Td>{player.avg_min.toFixed(1)}</Td>
                                             </Tr>
                                         ))}
                                     </Tbody>

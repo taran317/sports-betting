@@ -93,7 +93,7 @@ const TeamPage = () => {
             <form onSubmit={handleSubmit}>
             <Grid templateColumns="repeat(3, 1fr)" gap={4}>
                 <FormControl>
-                    <FormLabel>Home Team</FormLabel>
+                    <FormLabel>Team</FormLabel>
                     <Input
                         value={teamName}
                         onChange={(e) => setTeamName(e.target.value)}

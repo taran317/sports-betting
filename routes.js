@@ -424,12 +424,12 @@ const team_top_players = async function (req, res) {
     connection.query(
         `
         WITH player_stats_avg AS (
-    SELECT player_id, team_id, AVG(pts) as avg_pts, AVG(ast) as avg_ast, AVG(reb) as avg_reb
+    SELECT player_id, team_id, AVG(pts) as avg_pts, AVG(ast) as avg_ast, AVG(reb) as avg_reb, AVG(stl) as avg_stl, AVG(blk) as avg_blk, AVG(min) as avg_min
     FROM player_stats
     WHERE team_id = ${team_id}
     GROUP BY player_id
 )
-SELECT player_id, display_first_last, avg_pts, avg_ast, avg_reb, avg_pts + avg_ast + avg_reb AS avg_PRA
+SELECT player_id, display_first_last, avg_pts, avg_ast, avg_reb, avg_pts + avg_ast + avg_reb AS avg_PRA, avg_stl, avg_blk, avg_min
 FROM players P JOIN player_stats_avg PSA on P.person_id = PSA.player_id
 WHERE team_id = ${team_id}
 ORDER BY avg_PRA DESC

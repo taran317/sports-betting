@@ -153,8 +153,8 @@ const GameCard = ({ gameId: propGameId}) => {
                                             <Th>FG</Th>
                                             <Th>FT</Th>
                                             <Th>3P</Th>
-                                            <Th>+/-</Th>
                                             <Th>PF</Th>
+                                            <Th>+/-</Th>
                                         </Tr>
                                     </Thead>
                                     <Tbody>
@@ -170,10 +170,24 @@ const GameCard = ({ gameId: propGameId}) => {
                                                 <Td>{`${player.fgm} / ${player.fga}`}</Td>
                                                 <Td>{`${player.ftm} / ${player.fta}`}</Td>
                                                 <Td>{`${player.fg3m} / ${player.fg3a}`}</Td>
-                                                <Td>{player.plus_minus}</Td>
                                                 <Td>{player.pf}</Td>
+                                                <Td>{player.plus_minus}</Td>
                                             </Tr>
                                         ))}
+                                        <Tr>
+                                                <Td><b>{gameData[teamIndex].abbreviation}</b></Td>
+                                                <Td></Td>
+                                                <Td><b>{gameData[teamIndex].pts}</b></Td>
+                                                <Td><b>{gameData[teamIndex].reb}</b></Td>
+                                                <Td><b>{gameData[teamIndex].ast}</b></Td>
+                                                <Td><b>{gameData[teamIndex].stl}</b></Td>
+                                                <Td><b>{gameData[teamIndex].blk}</b></Td>
+                                                <Td><b>{`${gameData[teamIndex].fgm} / ${gameData[teamIndex].fga}`}</b></Td>
+                                                <Td><b>{`${gameData[teamIndex].ftm} / ${gameData[teamIndex].fta}`}</b></Td>
+                                                <Td><b>{`${gameData[teamIndex].fg3m} / ${gameData[teamIndex].fg3a}`}</b></Td>
+                                                <Td><b>{gameData[teamIndex].pf}</b></Td>
+                                                <Td></Td>
+                                        </Tr>
                                     </Tbody>
                                 </Table>
                             </Box>
@@ -264,8 +278,8 @@ const GameCard = ({ gameId: propGameId}) => {
                                     <Th>Spread Covers Away</Th>
                                     <Th>Underdog Wins Home</Th>
                                     <Th>Underdog Wins Away</Th>
-                                    <Th>Total Moneyline Home</Th>
-                                    <Th>Total Moneyline Away</Th>
+                                    <Th>Underdog Money Home</Th>
+                                    <Th>Underdog Money Away</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
