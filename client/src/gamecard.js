@@ -121,7 +121,7 @@ const GameCard = ({ gameId }) => {
                                     <Td>{gameData[0].matchup}</Td>
                                     <Td>{gameData[0].name}</Td>
                                     <Td>{gameData[1].name}</Td>
-                                    <Td>{gameData[0].game_date}</Td>
+                                    <Td>{gameData[0].game_date.substring(0, 10)}</Td>
                                     <Td>{gameData[0].pts}</Td>
                                     <Td>{gameData[1].pts}</Td>
                                 </Tr>
@@ -141,11 +141,14 @@ const GameCard = ({ gameId }) => {
                                 <Table variant="simple">
                                     <Thead>
                                         <Tr>
-                                            <Th>Player Name</Th>
-                                            <Th>Minutes</Th>
-                                            <Th>Points</Th>
-                                            <Th>Rebounds</Th>
-                                            <Th>Assists</Th>
+                                            <Th>Player</Th>
+                                            <Th>MIN</Th>
+                                            <Th>PT</Th>
+                                            <Th>RBD</Th>
+                                            <Th>AST</Th>
+                                            <Th>FG</Th>
+                                            <Th>FT</Th>
+                                            <Th>3P</Th>
                                         </Tr>
                                     </Thead>
                                     <Tbody>
@@ -156,6 +159,9 @@ const GameCard = ({ gameId }) => {
                                                 <Td>{player.pts}</Td>
                                                 <Td>{player.reb}</Td>
                                                 <Td>{player.ast}</Td>
+                                                <Td>{`${player.fgm} / ${player.fga}`}</Td>
+                                                <Td>{`${player.ftm} / ${player.fta}`}</Td>
+                                                <Td>{`${player.fg3m} / ${player.fg3a}`}</Td>
                                             </Tr>
                                         ))}
                                     </Tbody>
