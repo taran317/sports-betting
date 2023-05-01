@@ -40,6 +40,8 @@ const PlayerPage = () => {
 
       if (playerName) {
         queryParams["name"] = playerName;
+      } else {
+        queryParams["name"] = '';
       }
 
       console.log(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/player/search`);
@@ -86,6 +88,7 @@ const PlayerPage = () => {
 
   const handleReset = () => {
     setPlayerName("");
+    handleSearch();
   };
 
   const handleSubmit = (event) => {

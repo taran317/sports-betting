@@ -525,12 +525,17 @@ const middling_spread_betting = async function (req, res) {
 
 const player_search = async function (req, res) {
   let name_substring = req.query.name;
+  let page = parseInt(req.query["page"]) || 1;
+  let resultsPerPage = 20;
+  let offset = (page - 1) * resultsPerPage;
   connection.query(
     `SELECT person_id, display_first_last, from_year, to_year, draft_year, height_feet, height_inches, weight, team_id, jersey, school, country, AVG(fgm) as fgm, AVG(fga) as fga, avg(fg_pct) as fg_pct, avg(fg3m) as fg3m, avg(fg3a) as fg3a, avg(fg_pct) as fg3_pct, avg(ftm) as ftm, avg(ft_pct) as ft_pct, avg(oreb) as oreb, avg(dreb) as dreb, avg(reb) as reb, avg(ast) as ast, avg(stl) as stl, avg(blk) as blk, avg(tov) as tov, avg(pf) as pf, avg(pts) as pts
 FROM player_stats ps
     JOIN players p on ps.player_id = p.person_id
 WHERE LOWER(p.display_first_last) LIKE LOWER('%${name_substring}%')
-GROUP BY p.person_id;`,
+GROUP BY p.person_id
+LIMIT ? OFFSET ?;`,
+[resultsPerPage, offset],
     (err, data) => {
       if (err || data.length === 0) {
         console.log(err);
