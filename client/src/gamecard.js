@@ -22,6 +22,8 @@ const GameCard = ({ gameId }) => {
     const [gameData, setGameData] = useState([]);
     const [gamePlayers, setGamePlayers] = useState([[], []]);
     const [gameBetting, setGameBetting] = useState([]);
+    const [matchupStats, setMatchupStats] = useState([]);
+    const [matchupTopPairs, setMatchupTopPairs] = useState([]);
     const textColor = useColorModeValue('gray.700', 'white');
     const cardBg = useColorModeValue('gray.100', 'gray.900');
 
@@ -36,12 +38,19 @@ const GameCard = ({ gameId }) => {
                 console.log(`/game/${localGameId}`)
                 const gameRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/game/${localGameId}`);
                 setGameData(gameRes.data);
+                console.log(gameData);
                 console.log(`/game/${localGameId}/players`)
                 const gamePlayersRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/game/${localGameId}/players`);
                 setGamePlayers(gamePlayersRes.data);
                 console.log(`/game/${localGameId}/betting`)
                 const gameBettingRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/game/${localGameId}/betting`);
                 setGameBetting(gameBettingRes.data);
+                console.log(`/game/${localGameId}/matchup_stats`)
+                const matchupStatsRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/game/${localGameId}/matchup_stats`);
+                setMatchupStats(matchupStatsRes.data);
+                console.log(`/game/${localGameId}/matchup_top_pairs`)
+                const matchupTopPairs = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/game/${localGameId}/matchup_top_pairs`);
+                setMatchupTopPairs(matchupTopPairs.data);
             } catch (err) {
                 console.error(err);
             }
@@ -76,7 +85,7 @@ const GameCard = ({ gameId }) => {
             {/*        Update*/}
             {/*    </Button>*/}
             {/*</HStack>*/}
-            {gameId && (
+            {gameId && gameData && gameData[0] && gameData[1] && (
                 <Box
                     borderWidth="1px"
                     borderRadius="lg"
@@ -91,21 +100,31 @@ const GameCard = ({ gameId }) => {
                         <Table variant="simple">
                             <Thead>
                                 <Tr>
-                                    <Th>Team</Th>
-                                    <Th>Points</Th>
                                     <Th>Matchup</Th>
+                                    <Th>Home Team</Th>
+                                    <Th>Away Team</Th>
                                     <Th>Game Date</Th>
+                                    <Th>Home Score</Th>
+                                    <Th>Away Score</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {gameData.map((game, index) => (
+                                {/* {gameData.map((game, index) => (
                                     <Tr key={index}>
                                         <Td>{game.team_id}</Td>
                                         <Td>{game.pts}</Td>
                                         <Td>{game.matchup}</Td>
                                         <Td>{game.game_date}</Td>
                                     </Tr>
-                                ))}
+                                ))} */}
+                                <Tr>
+                                    <Td>{gameData[0].matchup}</Td>
+                                    <Td>{gameData[0].name}</Td>
+                                    <Td>{gameData[1].name}</Td>
+                                    <Td>{gameData[0].game_date}</Td>
+                                    <Td>{gameData[0].pts}</Td>
+                                    <Td>{gameData[1].pts}</Td>
+                                </Tr>
                             </Tbody>
                         </Table>
                     </Box>
@@ -152,19 +171,106 @@ const GameCard = ({ gameId }) => {
                         <Table variant="simple">
                             <Thead>
                                 <Tr>
-                                    <Th>Betting Line</Th>
-                                    <Th>Home Team Odds</Th>
-                                    <Th>Away Team Odds</Th>
+                                    <Th>Book Name</Th>
+                                    <Th>Moneyline Price Away</Th>
+                                    <Th>Moneyline Price Home</Th>
+                                    <Th>Spread Away</Th>
+                                    <Th>Spread Price Away</Th>
+                                    <Th>Spread Home</Th>
+                                    <Th>Spread Price Home</Th>
                                     <Th>Over/Under</Th>
+                                    <Th>Over Price</Th>
+                                    <Th>Under Price</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
                                 {gameBetting.map((bet, index) => (
                                     <Tr key={index}>
-                                        <Td>{bet.betting_line}</Td>
-                                        <Td>{bet.home_odds}</Td>
-                                        <Td>{bet.away_odds}</Td>
-                                        <Td>{bet.over_under}</Td>
+                                        <Td>{bet.book_name}</Td>
+                                        <Td>{bet.moneyline_price1}</Td>
+                                        <Td>{bet.moneyline_price2}</Td>
+                                        <Td>{bet.spread1}</Td>
+                                        <Td>{bet.spread_price1}</Td>
+                                        <Td>{bet.spread2}</Td>
+                                        <Td>{bet.spread_price2}</Td>
+                                        <Td>{bet.total1}</Td>
+                                        <Td>{bet.total_price1}</Td>
+                                        <Td>{bet.total_price2}</Td>
+                                    </Tr>
+                                ))}
+                            </Tbody>
+                        </Table>
+                    </Box>
+
+                    <Box w="100%">
+                        <Text fontSize="xl" fontWeight="bold">
+                            Historical Matchup Stats
+                        </Text>
+                        <Table variant="simple">
+                            <Thead>
+                                <Tr>
+                                    <Th>Home Team Wins</Th>
+                                    <Th>Away Team Wins</Th>
+                                    <Th>Home Team Average Points</Th>
+                                    <Th>Away Team Average Points</Th>
+                                    <Th>Total Games Played</Th>
+                                    <Th>Average Home Spread</Th>
+                                    <Th>Average Away Spread</Th>
+                                    <Th>Average Over/Under</Th>
+                                    <Th>Average Moneyline Price Home</Th>
+                                    <Th>Average Moneyline Price Away</Th>
+                                    <Th>Spread Covers Home</Th>
+                                    <Th>Spread Covers Away</Th>
+                                    <Th>Underdog Wins Home</Th>
+                                    <Th>Underdog Wins Away</Th>
+                                    <Th>Total Moneyline Home</Th>
+                                    <Th>Total Moneyline Away</Th>
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {matchupStats.map((x, index) => (
+                                    <Tr key={index}>
+                                        <Td>{x.team1_wins}</Td>
+                                        <Td>{x.team2_wins}</Td>
+                                        <Td>{x.avg_pts_team1}</Td>
+                                        <Td>{x.avg_pts_team2}</Td>
+                                        <Td>{x.total_games}</Td>
+                                        <Td>{x.avg_spread_team1}</Td>
+                                        <Td>{x.avg_spread_team2}</Td>
+                                        <Td>{x.average_total}</Td>
+                                        <Td>{x.avg_moneyline_price_team1}</Td>
+                                        <Td>{x.avg_moneyline_price_team2}</Td>
+                                        <Td>{x.spread_success_team1}</Td>
+                                        <Td>{x.spread_success_team2}</Td>
+                                        <Td>{x.underdog_wins_team1}</Td>
+                                        <Td>{x.underdog_wins_team2}</Td>
+                                        <Td>{x.total_money_team1}</Td>
+                                        <Td>{x.total_money_team2}</Td>
+                                    </Tr>
+                                ))}
+                            </Tbody>
+                        </Table>
+                    </Box>
+                    <Box w="100%">
+                        <Text fontSize="xl" fontWeight="bold">
+                            Top Player Matchups
+                        </Text>
+                        <Table variant="simple">
+                            <Thead>
+                                <Tr>
+                                    <Th>Home Team Player</Th>
+                                    <Th>Away Team Player</Th>
+                                    <Th>Total Games Played</Th>
+                                    <Th>Average Percentage of Points Scored</Th>
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {matchupTopPairs.map((y, index) => (
+                                    <Tr key={index}>
+                                        <Td>{y.player1}</Td>
+                                        <Td>{y.player2}</Td>
+                                        <Td>{y.total_games}</Td>
+                                        <Td>{y.avg_pct_pts}</Td>
                                     </Tr>
                                 ))}
                             </Tbody>

@@ -16,6 +16,8 @@ app.get('/game/search', routes.game_search);
 app.get('/game/:game_id', routes.game);
 app.get('/game/:game_id/players', routes.game_players);
 app.get('/game/:game_id/betting', routes.game_betting);
+app.get('/game/:game_id/matchup_stats', routes.matchup_stats);
+app.get('/game/:game_id/matchup_top_pairs', routes.matchup_top_pairs);
 
 app.get('/player/search', routes.player_search);
 app.get('/player/:player_id/games', routes.games_for_player);
@@ -24,18 +26,19 @@ app.get('/player/:player_id/average_stats', routes.player_average_stats);
 app.get('/player/:player_id/spread_performance', routes.player_spread_performance);
 
 app.get('/team/search', routes.team_search);
-app.get('/team/underdog-winrate', routes.team_underdog_winrate);
 app.get('/team/:team_id', routes.team);
-app.get('/team/:team_id/game-betting-data', routes.team_game_betting_data);
-app.get('/team/:team_id/underdog-wins', routes.team_underdog_wins);
-app.get('/team/:team_id/top-players', routes.team_top_players);
+app.get('/team/:team_id/betting', routes.team_game_betting_data);
+app.get('/team/:team_id/underdog_wins', routes.team_underdog_wins);
+app.get('/team/:team_id/underdog_money', routes.team_underdog_money);
+app.get('/team/:team_id/top_players', routes.team_top_players);
 app.get('/team/:team_id/games', routes.games_for_team);
-app.get('/team/:team_id/spread-covering-percentage', routes.team_spread_covering_percentage);
+app.get('/team/:team_id/spread_cover', routes.team_spread_covering_percentage);
+
+
+app.get('/team/underdog-winrate', routes.team_underdog_winrate);
 
 app.get('/trivia/middling_total', routes.middling_total_betting);
 app.get('/trivia/middling_spread', routes.middling_spread_betting);
-app.get('/trivia/matchup_stats', routes.matchup_stats);
-app.get('/trivia/matchup_top_pairs', routes.matchup_top_pairs);
 
 
 

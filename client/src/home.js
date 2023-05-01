@@ -17,6 +17,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { ChakraProvider } from '@chakra-ui/react';
 import { ColorModeScript } from '@chakra-ui/color-mode';
 import GamePage from './game';
+import TeamPage from './team';
 import { IconButton, useColorMode } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 
@@ -91,14 +92,7 @@ const HomePage = () => {
                                 </Button>
                             </TabPanel>
                             <TabPanel>
-                                <Button
-                                    mt={2}
-                                    colorScheme={buttonColor}
-                                    as={RouterLink}
-                                    to="/team"
-                                >
-                                    Explore Teams
-                                </Button>
+                                <TeamPage />
                             </TabPanel>
                         </TabPanels>
                     </Tabs>
