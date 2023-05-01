@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
     VStack,
     Heading,
@@ -10,8 +10,9 @@ import {
     FormControl,
     FormLabel,
     useToast, Tbody, Table, Thead, Th, Tr, Td, Flex, Center,
-    useColorModeValue
+    useColorModeValue, IconButton
 } from '@chakra-ui/react';
+import { FiArrowDownCircle } from 'react-icons/fi';
 import axios from 'axios';
 import GameCard from './gamecard';
 
@@ -26,9 +27,16 @@ const GamePage = () => {
     const [page, setPage] = useState(1);
     const [selectedGameId, setSelectedGameId] = useState(null);
     const hoverBgColor = useColorModeValue('gray.200', 'gray.700');
+    const gameCardRef = useRef(null);
 
 
     const toast = useToast();
+
+    const scrollToGameCard = () => {
+        if (gameCardRef.current) {
+            gameCardRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
 
     const handleSearch = async (page = 1) => {
         try {
@@ -196,10 +204,21 @@ const GamePage = () => {
                     Next
                 </Button>
             </Flex>
-        </VStack>
             <Box p={6}>
-                <GameCard gameId={selectedGameId} />
+                <div ref={gameCardRef}>
+                    <GameCard gameId={selectedGameId} />
+                </div>
             </Box>
+        </VStack>
+            <IconButton
+                position="fixed"
+                bottom="2rem"
+                right="2rem"
+                colorScheme="teal"
+                icon={<FiArrowDownCircle />}
+                onClick={scrollToGameCard}
+                zIndex="10"
+            />
         </Flex>
     );
 };
