@@ -15,9 +15,11 @@ import {
     Button,
 } from '@chakra-ui/react';
 import axios from 'axios';
+import {useLocation, useParams} from "react-router-dom";
 
-const GameCard = ({ gameId }) => {
-    const [localGameId, setLocalGameId] = useState(gameId);
+const GameCard = ({ gameId: propGameId}) => {
+    const { gameId } = useParams();
+    const [localGameId, setLocalGameId] = useState(propGameId || gameId);
     const [inputGameId, setInputGameId] = useState('');
     const [gameData, setGameData] = useState([]);
     const [gamePlayers, setGamePlayers] = useState([[], []]);
@@ -28,8 +30,8 @@ const GameCard = ({ gameId }) => {
     const cardBg = useColorModeValue('gray.100', 'gray.900');
 
     useEffect(() => {
-        setLocalGameId(gameId);
-    }, [gameId]);
+        setLocalGameId(propGameId || gameId);
+    }, [propGameId, gameId]);
 
     useEffect(() => {
         if (!localGameId) return;
@@ -85,7 +87,7 @@ const GameCard = ({ gameId }) => {
             {/*        Update*/}
             {/*    </Button>*/}
             {/*</HStack>*/}
-            {gameId && gameData && gameData[0] && gameData[1] && (
+            {propGameId && gameData && gameData[0] && gameData[1] && (
                 <Box
                     borderWidth="1px"
                     borderRadius="lg"

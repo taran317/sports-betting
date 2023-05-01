@@ -1,7 +1,8 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import {BrowserRouter, BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import HomePage from './home';
 import GamePage from './game';
+import GameCard from './gamecard';
 // import PlayerPage from './PlayerPage';
 import TeamPage from './team';
 
@@ -10,8 +11,7 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/game" element={<GamePage />} />
-                {/*<Route path="/player" element={<PlayerPage />} />*/}
+                <Route path="/game/:gameId" element={<GameCard />} />
                 <Route path="/team" element={<TeamPage />} />
             </Routes>
         </Router>
