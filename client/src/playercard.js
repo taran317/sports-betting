@@ -17,8 +17,35 @@ import {
 import axios from "axios";
 
 const PlayerCard = ({ player }) => {
+  const [underdogStats, setUnderdogStats] = useState(null);
+  const [spreadStats, setSpreadStats] = useState(null);
   const textColor = useColorModeValue("gray.700", "white");
   const cardBg = useColorModeValue("gray.100", "gray.900");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        console.log("fetching data");
+        const [underdogResponse, spreadResponse] = await Promise.all([
+          axios.get(
+            `${process.env.REACT_APP_EXPRESS_APP_API_URL}/player/${player.person_id}/player_underdog`
+          ),
+          axios.get(
+            `${process.env.REACT_APP_EXPRESS_APP_API_URL}/player/${player.person_id}/spread_performance`
+          ),
+        ]);
+        setUnderdogStats(underdogResponse.data[0]);
+        setSpreadStats(spreadResponse.data[0]);
+        console.log(underdogResponse.data);
+        console.log(spreadResponse.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    if (player) {
+      fetchData();
+    }
+  }, [player]);
 
 return (
   <Box>
@@ -35,17 +62,17 @@ return (
             Player Information
           </Text>
           <Table variant="simple">
-          <Thead>
-                                <Tr>
-                                    <Th>Name</Th>
-                                    <Th>Height</Th>
-                                    <Th>Weight</Th>
-                                    <Th>Career Span</Th>
-                                    <Th>Jersey</Th>
-                                    <Th>School</Th>
-                                    <Th>Country</Th>
-                                </Tr>
-                            </Thead>
+            <Thead>
+              <Tr>
+                <Th>Name</Th>
+                <Th>Height</Th>
+                <Th>Weight</Th>
+                <Th>Career Span</Th>
+                <Th>Jersey</Th>
+                <Th>School</Th>
+                <Th>Country</Th>
+              </Tr>
+            </Thead>
             <Tbody>
               <Tr>
                 <Td>{player.display_first_last || "N/A"}</Td>
@@ -64,130 +91,6 @@ return (
                 <Td>{player.school || "N/A"}</Td>
                 <Td>{player.country || "N/A"}</Td>
               </Tr>
-              {/* <Tr>
-                <Td fontWeight="bold">Points per Game:</Td>
-                <Td>{player.pts ? player.pts.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Assists per Game:</Td>
-                <Td>{player.ast ? player.ast.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Total Rebounds per Game:</Td>
-                <Td>{player.reb ? player.reb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Playing Career:</Td>
-                <Td>
-                  {player.from_year && player.to_year
-                    ? player.from_year + "-" + player.to_year
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Field Goal Percentage:</Td>
-                <Td>
-                  {player.fga && player.fgm
-                    ? ((player.fgm / player.fga) * 100).toFixed(1) + "%"
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Three-Point Percentage:</Td>
-                <Td>
-                  {player.fg3m && player.fg3a
-                    ? ((player.fg3m / player.fg3a) * 100).toFixed(1) + "%"
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Free Throw Percentage:</Td>
-                <Td>
-                  {player.ft_pct
-                    ? (player.ft_pct * 100).toFixed(1) + "%"
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Height:</Td>
-                <Td>
-                  {player.height_feet && player.height_inches
-                    ? player.height_feet + "'" + player.height_inches + '"'
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Weight:</Td>
-                <Td>{player.weight ? player.weight + " lbs" : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Draft Year:</Td>
-                <Td>{player.draft_year || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Jersey:</Td>
-                <Td>{player.jersey || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">School:</Td>
-                <Td>{player.school || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Country:</Td>
-                <Td>{player.country || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Field Goals Made:</Td>
-                <Td>{player.fgm ? player.fgm.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Field Goals Attempted:</Td>
-                <Td>{player.fga ? player.fga.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Three-Pointers Made:</Td>
-                <Td>{player.fg3m ? player.fg3m.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Three-Pointers Attempted:</Td>
-                <Td>{player.fg3a ? player.fg3a.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Free Throws Made:</Td>
-                <Td>{player.ftm ? player.ftm.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Offensive Rebounds:</Td>
-                <Td>{player.oreb ? player.oreb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Defensive Rebounds:</Td>
-                <Td>{player.dreb ? player.dreb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Total Rebounds:</Td>
-                <Td>{player.reb ? player.reb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Assists:</Td>
-                <Td>{player.ast ? player.ast.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Steals:</Td>
-                <Td>{player.stl ? player.stl.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Blocks:</Td>
-                <Td>{player.blk ? player.blk.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Turnovers:</Td>
-                <Td>{player.tov ? player.tov.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Personal Fouls:</Td>
-                <Td>{player.pf ? player.pf.toFixed(2) : "N/A"}</Td>
-              </Tr> */}
             </Tbody>
           </Table>
         </Box>
@@ -197,18 +100,18 @@ return (
             Counting Averages
           </Text>
           <Table variant="simple">
-          <Thead>
-                                <Tr>
-                                    <Th>PTS</Th>
-                                    <Th>AST</Th>
-                                    <Th>RBD</Th>
-                                    <Th>STL</Th>
-                                    <Th>BLK</Th>
-                                    <Th>MIN</Th>
-                                    <Th>TOV</Th>
-                                    <Th>PF</Th>
-                                </Tr>
-                            </Thead>
+            <Thead>
+              <Tr>
+                <Th>PTS</Th>
+                <Th>AST</Th>
+                <Th>RBD</Th>
+                <Th>STL</Th>
+                <Th>BLK</Th>
+                <Th>MIN</Th>
+                <Th>TOV</Th>
+                <Th>PF</Th>
+              </Tr>
+            </Thead>
             <Tbody>
               <Tr>
                 <Td>{player.pts ? player.pts.toFixed(2) : "N/A"}</Td>
@@ -220,130 +123,6 @@ return (
                 <Td>{player.tov ? player.tov.toFixed(2) : "N/A"}</Td>
                 <Td>{player.pf ? player.pf.toFixed(2) : "N/A"}</Td>
               </Tr>
-              {/* <Tr>
-                <Td fontWeight="bold">Points per Game:</Td>
-                <Td>{player.pts ? player.pts.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Assists per Game:</Td>
-                <Td>{player.ast ? player.ast.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Total Rebounds per Game:</Td>
-                <Td>{player.reb ? player.reb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Playing Career:</Td>
-                <Td>
-                  {player.from_year && player.to_year
-                    ? player.from_year + "-" + player.to_year
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Field Goal Percentage:</Td>
-                <Td>
-                  {player.fga && player.fgm
-                    ? ((player.fgm / player.fga) * 100).toFixed(1) + "%"
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Three-Point Percentage:</Td>
-                <Td>
-                  {player.fg3m && player.fg3a
-                    ? ((player.fg3m / player.fg3a) * 100).toFixed(1) + "%"
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Free Throw Percentage:</Td>
-                <Td>
-                  {player.ft_pct
-                    ? (player.ft_pct * 100).toFixed(1) + "%"
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Height:</Td>
-                <Td>
-                  {player.height_feet && player.height_inches
-                    ? player.height_feet + "'" + player.height_inches + '"'
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Weight:</Td>
-                <Td>{player.weight ? player.weight + " lbs" : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Draft Year:</Td>
-                <Td>{player.draft_year || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Jersey:</Td>
-                <Td>{player.jersey || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">School:</Td>
-                <Td>{player.school || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Country:</Td>
-                <Td>{player.country || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Field Goals Made:</Td>
-                <Td>{player.fgm ? player.fgm.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Field Goals Attempted:</Td>
-                <Td>{player.fga ? player.fga.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Three-Pointers Made:</Td>
-                <Td>{player.fg3m ? player.fg3m.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Three-Pointers Attempted:</Td>
-                <Td>{player.fg3a ? player.fg3a.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Free Throws Made:</Td>
-                <Td>{player.ftm ? player.ftm.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Offensive Rebounds:</Td>
-                <Td>{player.oreb ? player.oreb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Defensive Rebounds:</Td>
-                <Td>{player.dreb ? player.dreb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Total Rebounds:</Td>
-                <Td>{player.reb ? player.reb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Assists:</Td>
-                <Td>{player.ast ? player.ast.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Steals:</Td>
-                <Td>{player.stl ? player.stl.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Blocks:</Td>
-                <Td>{player.blk ? player.blk.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Turnovers:</Td>
-                <Td>{player.tov ? player.tov.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Personal Fouls:</Td>
-                <Td>{player.pf ? player.pf.toFixed(2) : "N/A"}</Td>
-              </Tr> */}
             </Tbody>
           </Table>
         </Box>
@@ -352,157 +131,135 @@ return (
             Shooting Averages
           </Text>
           <Table variant="simple">
-          <Thead>
-                                <Tr>
-                                    <Th>FG</Th>
-                                    <Th>FG%</Th>
-                                    <Th>FT</Th>
-                                    <Th>FT%</Th>
-                                    <Th>3P</Th>
-                                    <Th>3P%</Th>
-                                </Tr>
-                            </Thead>
+            <Thead>
+              <Tr>
+                <Th>FG</Th>
+                <Th>FG%</Th>
+                <Th>FT</Th>
+                <Th>FT%</Th>
+                <Th>3P</Th>
+                <Th>3P%</Th>
+              </Tr>
+            </Thead>
             <Tbody>
               <Tr>
-                <Td>{`${player.fgm ? player.fgm.toFixed(1) : "N/A"} / ${player.fga ? player.fga.toFixed(1) : "N/A"}`}</Td>
-                <Td>{player.fga && player.fgm
-                    ? ((player.fgm / player.fga) * 100).toFixed(1) + "%"
-                    : "N/A"}</Td>
-                    <Td>{`${player.ftm ? player.ftm.toFixed(1) : "N/A"} / ${player.fta ? player.fta.toFixed(1) : "N/A"}`}</Td>
-                <Td>{player.fta && player.ftm
-                    ? ((player.ftm / player.fta) * 100).toFixed(1) + "%"
-                    : "N/A"}</Td>
-                    <Td>{`${player.fg3m ? player.fg3m.toFixed(1) : "N/A"} / ${player.fg3a ? player.fg3a.toFixed(1) : "N/A"}`}</Td>
-                  <Td>{player.fg3a && player.fg3m
-                    ? ((player.fg3m / player.fg3a) * 100).toFixed(1) + "%"
-                    : "N/A"}</Td>
-              </Tr>
-              {/* <Tr>
-                <Td fontWeight="bold">Points per Game:</Td>
-                <Td>{player.pts ? player.pts.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Assists per Game:</Td>
-                <Td>{player.ast ? player.ast.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Total Rebounds per Game:</Td>
-                <Td>{player.reb ? player.reb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Playing Career:</Td>
-                <Td>
-                  {player.from_year && player.to_year
-                    ? player.from_year + "-" + player.to_year
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Field Goal Percentage:</Td>
+                <Td>{`${player.fgm ? player.fgm.toFixed(1) : "N/A"} / ${
+                  player.fga ? player.fga.toFixed(1) : "N/A"
+                }`}</Td>
                 <Td>
                   {player.fga && player.fgm
                     ? ((player.fgm / player.fga) * 100).toFixed(1) + "%"
                     : "N/A"}
                 </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Three-Point Percentage:</Td>
+                <Td>{`${player.ftm ? player.ftm.toFixed(1) : "N/A"} / ${
+                  player.fta ? player.fta.toFixed(1) : "N/A"
+                }`}</Td>
                 <Td>
-                  {player.fg3m && player.fg3a
+                  {player.fta && player.ftm
+                    ? ((player.ftm / player.fta) * 100).toFixed(1) + "%"
+                    : "N/A"}
+                </Td>
+                <Td>{`${player.fg3m ? player.fg3m.toFixed(1) : "N/A"} / ${
+                  player.fg3a ? player.fg3a.toFixed(1) : "N/A"
+                }`}</Td>
+                <Td>
+                  {player.fg3a && player.fg3m
                     ? ((player.fg3m / player.fg3a) * 100).toFixed(1) + "%"
                     : "N/A"}
                 </Td>
               </Tr>
-              <Tr>
-                <Td fontWeight="bold">Free Throw Percentage:</Td>
-                <Td>
-                  {player.ft_pct
-                    ? (player.ft_pct * 100).toFixed(1) + "%"
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Height:</Td>
-                <Td>
-                  {player.height_feet && player.height_inches
-                    ? player.height_feet + "'" + player.height_inches + '"'
-                    : "N/A"}
-                </Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Weight:</Td>
-                <Td>{player.weight ? player.weight + " lbs" : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Draft Year:</Td>
-                <Td>{player.draft_year || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Jersey:</Td>
-                <Td>{player.jersey || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">School:</Td>
-                <Td>{player.school || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Country:</Td>
-                <Td>{player.country || "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Field Goals Made:</Td>
-                <Td>{player.fgm ? player.fgm.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Field Goals Attempted:</Td>
-                <Td>{player.fga ? player.fga.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Three-Pointers Made:</Td>
-                <Td>{player.fg3m ? player.fg3m.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Three-Pointers Attempted:</Td>
-                <Td>{player.fg3a ? player.fg3a.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Free Throws Made:</Td>
-                <Td>{player.ftm ? player.ftm.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Offensive Rebounds:</Td>
-                <Td>{player.oreb ? player.oreb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Defensive Rebounds:</Td>
-                <Td>{player.dreb ? player.dreb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Total Rebounds:</Td>
-                <Td>{player.reb ? player.reb.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Assists:</Td>
-                <Td>{player.ast ? player.ast.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Steals:</Td>
-                <Td>{player.stl ? player.stl.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Blocks:</Td>
-                <Td>{player.blk ? player.blk.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Turnovers:</Td>
-                <Td>{player.tov ? player.tov.toFixed(2) : "N/A"}</Td>
-              </Tr>
-              <Tr>
-                <Td fontWeight="bold">Personal Fouls:</Td>
-                <Td>{player.pf ? player.pf.toFixed(2) : "N/A"}</Td>
-              </Tr> */}
             </Tbody>
           </Table>
+          <Text fontSize="xl" fontWeight="bold">
+            Shooting Averages
+          </Text>
+          <Table variant="simple">
+            <Thead>
+              <Tr>
+                <Th>FG</Th>
+                <Th>FG%</Th>
+                <Th>FT</Th>
+                <Th>FT%</Th>
+                <Th>3P</Th>
+                <Th>3P%</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              <Tr>
+                <Td>{`${player.fgm ? player.fgm.toFixed(1) : "N/A"} / ${
+                  player.fga ? player.fga.toFixed(1) : "N/A"
+                }`}</Td>
+                <Td>
+                  {player.fga && player.fgm
+                    ? ((player.fgm / player.fga) * 100).toFixed(1) + "%"
+                    : "N/A"}
+                </Td>
+                <Td>{`${player.ftm ? player.ftm.toFixed(1) : "N/A"} / ${
+                  player.fta ? player.fta.toFixed(1) : "N/A"
+                }`}</Td>
+                <Td>
+                  {player.fta && player.ftm
+                    ? ((player.ftm / player.fta) * 100).toFixed(1) + "%"
+                    : "N/A"}
+                </Td>
+                <Td>{`${player.fg3m ? player.fg3m.toFixed(1) : "N/A"} / ${
+                  player.fg3a ? player.fg3a.toFixed(1) : "N/A"
+                }`}</Td>
+                <Td>
+                  {player.fg3a && player.fg3m
+                    ? ((player.fg3m / player.fg3a) * 100).toFixed(1) + "%"
+                    : "N/A"}
+                </Td>
+              </Tr>
+            </Tbody>
+          </Table>
+          <Text fontSize="xl" fontWeight="bold">
+            Underdog Stats
+          </Text>
+          {underdogStats ? (
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Total Games</Th>
+                  <Th>Total Money</Th>
+                  <Th>Money per Game</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>{underdogStats.total_games || "N/A"}</Td>
+                  <Td>{underdogStats.total_money || "N/A"}</Td>
+                  <Td>{underdogStats.money_per_game || "N/A"}</Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          ) : (
+            <Text>No underdog stats available</Text>
+          )}
+
+          <Text fontSize="xl" fontWeight="bold">
+            Spread Stats
+          </Text>
+          {spreadStats ? (
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Count</Th>
+                  <Th>Total Games</Th>
+                  <Th>Spread Percentage</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                <Tr>
+                  <Td>{spreadStats.count || "N/A"}</Td>
+                  <Td>{spreadStats.total_games || "N/A"}</Td>
+                  <Td>{spreadStats ? (spreadStats.spread_percentage * 100).toFixed(1) : 'N/A'}%</Td>
+                </Tr>
+              </Tbody>
+            </Table>
+          ) : (
+            <Text>No spread stats available</Text>
+          )}
         </Box>
       </Box>
     )}

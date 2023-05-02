@@ -200,7 +200,7 @@ const player_underdog = async function (req, res) {
             FROM (
                 SELECT team_id, game_id, player_id
                 FROM player_stats
-                WHERE player_id=${player_id}
+                WHERE player_id=${req.params.player_id}
             ) P JOIN (
                 SELECT game_id, team_id, a_team_id, moneyline_price1, moneyline_price2
                 FROM betting_data
@@ -228,7 +228,7 @@ const player_spread_performance = async function (req, res) {
     WITH total_games AS (
       SELECT P.player_id, COUNT(*) AS total_games
       FROM player_stats P
-      WHERE P.player_id = ${player_id}
+      WHERE P.player_id = ${req.params.player_id}
       GROUP BY P.player_id
   ), pts_difference AS (
       SELECT G1.pts - G2.pts AS pts_difference, G2.pts - G1.pts AS pts_difference2, G1.game_id
@@ -240,7 +240,7 @@ const player_spread_performance = async function (req, res) {
           SELECT DISTINCT B.game_id, B.team_id
           FROM betting_data B JOIN pts_difference G ON B.game_id = G.game_id AND pts_difference2 < B.spread1
       ) B ON PS.team_id = B.team_id AND PS.game_id = B.game_id
-      WHERE PS.player_id = ${player_id}
+      WHERE PS.player_id = ${req.params.player_id}
       GROUP BY PS.player_id
   ), spread_covers2 AS (
       SELECT COUNT(B.game_id) AS count, PS.player_id
@@ -248,7 +248,7 @@ const player_spread_performance = async function (req, res) {
           SELECT DISTINCT B.game_id, B.a_team_id
           FROM betting_data B JOIN pts_difference G ON B.game_id = G.game_id AND pts_difference < B.spread2
       ) B ON PS.team_id = B.a_team_id AND PS.game_id = B.game_id
-      WHERE PS.player_id = ${player_id}
+      WHERE PS.player_id = ${req.params.player_id}
       GROUP BY PS.player_id
   )
   SELECT P.person_id, P.display_first_last, S1.count + S2.count AS count, TG.total_games,
