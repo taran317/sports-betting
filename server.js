@@ -2,11 +2,18 @@ const express = require('express');
 const cors = require('cors');
 const config = require('./config.json');
 const routes = require('./routes');
+const path = require('path');
 
 const app = express();
 app.use(cors({
     origin: '*',
 }));
+
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+});
 
 
 // We use express to define our various API endpoints and
@@ -45,8 +52,14 @@ app.get('/trivia/arbitrage', routes.trivia_arbitrage);
 app.get('/trivia/spread_players', routes.trivia_spread_players);
 app.get('/trivia/underdog_players', routes.trivia_underdog_players);
 
-app.listen(config.server_port, () => {
-    console.log(`Server running at http://${config.server_host}:${config.server_port}/`)
+// app.listen(config.server_port, () => {
+//     console.log(`Server running at http://${config.server_host}:${config.server_port}/`)
+// });
+
+const PORT = process.env.PORT || config.server_port;
+
+app.listen(PORT, () => {
+    console.log(`Server running at http://${config.server_host}:${PORT}/`)
 });
 
 module.exports = app;
