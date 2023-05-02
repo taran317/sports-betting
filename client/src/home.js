@@ -22,6 +22,7 @@ import TriviaPage from './trivia';
 import { IconButton, useColorMode } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 import PlayerPage from './player';
+import TriviaPlayersPage from './triviaplayers';
 
 
 const theme = extendTheme({
@@ -77,7 +78,8 @@ const HomePage = () => {
                             <Tab>Game</Tab>
                             <Tab>Player</Tab>
                             <Tab>Team</Tab>
-                            <Tab>Trivia</Tab>
+                            <Tab>Betting Trivia</Tab>
+                            <Tab>Player Trivia</Tab>
                         </TabList>
 
                         <TabPanels>
@@ -92,6 +94,9 @@ const HomePage = () => {
                             </TabPanel>
                             <TabPanel>
                                 <TriviaPage />
+                            </TabPanel>
+                            <TabPanel>
+                                <TriviaPlayersPage />
                             </TabPanel>
                         </TabPanels>
                     </Tabs>

@@ -20,7 +20,7 @@ const TriviaPage = () => {
     const hoverBgColor = useColorModeValue('gray.200', 'gray.700');
     const [middleTotal, setMiddleTotal] = useState([]);
     const [middleSpread, setMiddleSpread] = useState([]);
-    const [playerMatchups, setPlayerMatchups] = useState([]);
+    const [arbitrage, setArbitrage] = useState([]);
     const [threshold, setThreshold] = useState(2);
     const [thresholdInput, setThresholdInput] = useState(2);
 
@@ -46,19 +46,18 @@ const TriviaPage = () => {
     }, [threshold]);
 
     useEffect(() => {
-        async function fetchData() {
+        async function fetchData2() {
             try {
-                console.log(`/trivia/top_matchups`);
-                const matchupRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/trivia/top_matchups`);
-                console.log(matchupRes);
-                setPlayerMatchups(matchupRes.data);
-            } catch(err) {
+                console.log(`/trivia/arbitrage`);
+                const arbRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/trivia/arbitrage`);
+                setArbitrage(arbRes.data);
+            } catch (err) {
                 console.log(err);
             }
         }
 
-        fetchData();
-    }, [playerMatchups]);
+        fetchData2();
+    }, []);
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -114,29 +113,36 @@ const TriviaPage = () => {
                                 </Tr>
                 </Tbody>
             </Table>
+            
             <Text fontSize="xl" fontWeight="bold">
-            Top Player Matchups
+            Arbitrage Opportunities
           </Text>
             <Table mt={6} variant="simple" width="100%">
                 <Thead>
                     <Tr>
-                        <Th>Player 1</Th>
-                        <Th>Player 2</Th>
-                        <Th>Total Games</Th>
-                        <Th>Average Percentage of Points Scored</Th>
+                        <Th>Matchup</Th>
+                        <Th>Game Date</Th>
+                        <Th>Book 1</Th>
+                        <Th>Book 2</Th>
+                        <Th>Spread 1</Th>
+                        <Th>Spread 2</Th>
+                        <Th>Arbitrage Percentage</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
-                    {playerMatchups.map((pair, index) => (
+                {arbitrage.map((x, index) => (
                                     <Tr key={index}>
-                                        <Td>{pair.name1}</Td>
-                                        <Td>{pair.name2}</Td>
-                                        <Td>{pair.total_games}</Td>
-                                        <Td>{pair.avg_pct_pts}</Td>
+                                        <Td>{x.matchup}</Td>
+                                        <Td>{x.game_date.substring(0, 10)}</Td>
+                                        <Td>{x.book1}</Td>
+                                        <Td>{x.book2}</Td>
+                                        <Td>{x.spread_price1}</Td>
+                                        <Td>{x.spread_price2}</Td>
+                                        <Td>{(x.arbitrage_percentage * 100).toFixed(2)}%</Td>
                                     </Tr>
                                 ))}
                 </Tbody>
-            </Table>
+                </Table>
         </VStack>
         </Flex>
     );

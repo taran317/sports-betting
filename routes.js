@@ -700,63 +700,69 @@ LIMIT ? OFFSET ?;`,
   );
 };
 
-const team_underdog_winrate = async function (req, res) {
-  connection.query(
-    `WITH underdog_win_games AS (
-   SELECT G.team_id, B.game_id, (-1*AVG(moneyline_price1)) as avg_moneyline_win, COUNT(*) as num_wins
-   FROM betting_data B, game_data G
-   WHERE B.game_id = G.game_id
-       AND G.wl = "W"
-       AND ((B.moneyline_price1 < 0))
-   GROUP BY G.team_id
-), underdog_loss_games AS (
-   SELECT G.team_id, B.game_id, AVG(moneyline_price1) as avg_moneyline_loss, COUNT(*) as num_losses
-   FROM betting_data B, game_data G
-   WHERE B.game_id = G.game_id
-       AND G.wl = "L"
-       AND ((B.moneyline_price1 < 0))
-   GROUP BY G.team_id
-)
-SELECT uwg.team_id, (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) as win_pctg,
-       uwg.avg_moneyline_win as avg_moneyline_win, ulg.avg_moneyline_loss as avg_moneyline_loss,
-       (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) * uwg.avg_moneyline_win +
-       (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) * ulg.avg_moneyline_loss as expected_moneyline_win_or_loss
-FROM underdog_win_games uwg
-    JOIN underdog_loss_games ulg ON uwg.team_id = ulg.team_id
-ORDER BY expected_moneyline_win_or_loss DESC;`,
-    (err, data) => {
-      if (err || data.length === 0) {
-        console.log(err);
-      } else {
-        res.json(data);
-      }
-    }
-  );
-};
+// const team_underdog_winrate = async function (req, res) {
+//   connection.query(
+//     `WITH underdog_win_games AS (
+//    SELECT G.team_id, B.game_id, (-1*AVG(moneyline_price1)) as avg_moneyline_win, COUNT(*) as num_wins
+//    FROM betting_data B, game_data G
+//    WHERE B.game_id = G.game_id
+//        AND G.wl = "W"
+//        AND ((B.moneyline_price1 < 0))
+//    GROUP BY G.team_id
+// ), underdog_loss_games AS (
+//    SELECT G.team_id, B.game_id, AVG(moneyline_price1) as avg_moneyline_loss, COUNT(*) as num_losses
+//    FROM betting_data B, game_data G
+//    WHERE B.game_id = G.game_id
+//        AND G.wl = "L"
+//        AND ((B.moneyline_price1 < 0))
+//    GROUP BY G.team_id
+// )
+// SELECT uwg.team_id, (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) as win_pctg,
+//        uwg.avg_moneyline_win as avg_moneyline_win, ulg.avg_moneyline_loss as avg_moneyline_loss,
+//        (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) * uwg.avg_moneyline_win +
+//        (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) * ulg.avg_moneyline_loss as expected_moneyline_win_or_loss
+// FROM underdog_win_games uwg
+//     JOIN underdog_loss_games ulg ON uwg.team_id = ulg.team_id
+// ORDER BY expected_moneyline_win_or_loss DESC;`,
+//     (err, data) => {
+//       if (err || data.length === 0) {
+//         console.log(err);
+//       } else {
+//         res.json(data);
+//       }
+//     }
+//   );
+// };
 
 const trivia_top_matchups = async function(req, res) {
-  connection.query(`
-  WITH total_game_pts AS (
-    SELECT G1.game_id, G1.pts + G2.pts AS total_pts
-    FROM game_data G1 JOIN game_data G2 on G1.game_id = G2.game_id AND G1.a_team_id = G2.team_id
-    WHERE G1.team_id < G2.team_id
- ),
- player_stats2 AS (
-    SELECT PS.pts, PS.player_id, PS.game_id, PS.team_id, P.display_first_last
-    FROM player_stats PS JOIN players P on PS.player_id = P.person_id
- )
- SELECT PS.id1, PS.id2, PS.name1, PS.name2, AVG((PS.pair_pts / G.total_pts)) AS avg_pct_pts, COUNT(*) AS total_games
- FROM total_game_pts G JOIN (
-    SELECT PS1.player_id AS id1, PS2.player_id AS id2,
-           PS1.display_first_last AS name1, PS2.display_first_last AS name2,
-           PS1.game_id, PS1.pts + PS2.pts AS pair_pts
-    FROM player_stats2 PS1 JOIN (
-        SELECT player_id, pts, team_id, game_id, display_first_last
-        FROM player_stats2
-    ) PS2 ON PS1.game_id = PS2.game_id AND PS1.player_id < PS2.player_id AND PS1.team_id <> PS2.team_id
- ) PS ON G.game_id = PS.game_id
- GROUP BY PS.id1, PS.id2
- HAVING total_games >= 5
+  connection.query(
+    //`
+//   WITH total_game_pts AS (
+//     SELECT G1.game_id, G1.pts + G2.pts AS total_pts
+//     FROM game_data G1 JOIN game_data G2 on G1.game_id = G2.game_id AND G1.a_team_id = G2.team_id
+//     WHERE G1.team_id < G2.team_id
+//  ),
+//  player_stats2 AS (
+//     SELECT PS.pts, PS.player_id, PS.game_id, PS.team_id, P.display_first_last
+//     FROM player_stats PS JOIN players P on PS.player_id = P.person_id
+//  )
+//  SELECT PS.id1, PS.id2, PS.name1, PS.name2, AVG((PS.pair_pts / G.total_pts)) AS avg_pct_pts, COUNT(*) AS total_games
+//  FROM total_game_pts G JOIN (
+//     SELECT PS1.player_id AS id1, PS2.player_id AS id2,
+//            PS1.display_first_last AS name1, PS2.display_first_last AS name2,
+//            PS1.game_id, PS1.pts + PS2.pts AS pair_pts
+//     FROM player_stats2 PS1 JOIN (
+//         SELECT player_id, pts, team_id, game_id, display_first_last
+//         FROM player_stats2
+//     ) PS2 ON PS1.game_id = PS2.game_id AND PS1.player_id < PS2.player_id AND PS1.team_id <> PS2.team_id
+//  ) PS ON G.game_id = PS.game_id
+//  GROUP BY PS.id1, PS.id2
+//  HAVING total_games >= 5
+//  ORDER BY avg_pct_pts DESC
+//  LIMIT 15;
+//   `
+`
+  SELECT * FROM topmatchups
  ORDER BY avg_pct_pts DESC
  LIMIT 15;
   `, (err, data) => {
@@ -768,6 +774,105 @@ const trivia_top_matchups = async function(req, res) {
     }
   }
   );
+}
+
+const trivia_arbitrage = async function(req, res) {
+  connection.query(`SELECT B1.book_name AS book1, B2.book_name AS book2, B1.spread_price1, B2.spread_price2, G.matchup, G.game_date, 1 / IF(B1.spread_price1 < 0, 1 + 100 / ABS(B1.spread_price1), B1.spread_price1 / 100 + 1)
+  + 1 / IF(B2.spread_price2 < 0, 1 + 100 / ABS(B2.spread_price2), B2.spread_price2 / 100 + 1) AS arbitrage_percentage
+FROM betting_data B1 JOIN betting_data B2 ON B1.game_id = B2.game_id
+  JOIN game_data G ON B1.game_id = G.game_id AND B1.team_id = G.team_id
+WHERE 1 / IF(B1.spread_price1 < 0, 1 + 100 / ABS(B1.spread_price1), B1.spread_price1 / 100 + 1)
+  + 1 / IF(B2.spread_price2 < 0, 1 + 100 / ABS(B2.spread_price2), B2.spread_price2 / 100 + 1) < 1
+  LIMIT 10;`, 
+  (err, data) => {
+    if (err || data.length == 0) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data);
+    }
+  })
+} 
+
+const trivia_spread_players = async function(req, res) {
+  connection.query(`WITH total_games AS (
+    SELECT P.player_id, COUNT(*) AS total_games
+    FROM player_stats P
+    GROUP BY P.player_id
+    HAVING total_games >= 50
+ ), pts_difference AS (
+    SELECT G1.pts - G2.pts AS pts_difference, G2.pts - G1.pts AS pts_difference2, G1.game_id
+    FROM game_data G1 JOIN game_data G2 on G1.game_id = G2.game_id AND G1.a_team_id = G2.team_id
+    WHERE G1.is_home = 'f'
+ ), spread_covers1 AS (
+    SELECT COUNT(B.game_id) AS count, PS.player_id
+    FROM player_stats PS JOIN (
+        SELECT DISTINCT B.game_id, B.team_id
+        FROM betting_data B JOIN pts_difference G ON B.game_id = G.game_id AND pts_difference2 < B.spread1
+    ) B ON PS.team_id = B.team_id AND PS.game_id = B.game_id
+    GROUP BY PS.player_id
+ ), spread_covers2 AS (
+    SELECT COUNT(B.game_id) AS count, PS.player_id
+    FROM player_stats PS JOIN (
+        SELECT DISTINCT B.game_id, B.a_team_id
+        FROM betting_data B JOIN pts_difference G ON B.game_id = G.game_id AND pts_difference < B.spread2
+    ) B ON PS.team_id = B.a_team_id AND PS.game_id = B.game_id
+    GROUP BY PS.player_id
+ )
+ SELECT P.person_id, P.display_first_last, S1.count + S2.count AS count, TG.total_games,
+       (S1.count + S2.count) / TG.total_games AS spread_percentage
+ FROM total_games TG JOIN spread_covers1 S1 ON TG.player_id = S1.player_id
+    JOIN spread_covers2 S2 ON TG.player_id = S2.player_id
+    JOIN players P ON TG.player_id = P.person_id
+ ORDER BY spread_percentage DESC
+ LIMIT 15`, 
+  (err, data) => {
+    if (err || data.length == 0) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data);
+    }
+  })
+}
+
+const trivia_underdog_players = async function(req, res) {
+  connection.query(`SELECT P.player_id, P2.display_first_last, P.total_games, P.total_money, P.total_money / P.total_games AS money_per_game
+  FROM (
+     SELECT person_id, display_first_last
+     FROM players
+  ) P2 JOIN (
+     SELECT P.player_id, COUNT(P.game_id) AS total_games,
+            SUM(IF(G.wl = 'W', IF(P.moneyline_price1 > 0, P.moneyline_price1, P.moneyline_price2), -100)) AS total_money
+     FROM (
+         SELECT game_id, team_id,  wl
+         FROM game_data
+     ) G JOIN (
+         SELECT P.team_id, P.game_id, P.player_id, B.moneyline_price1, B.moneyline_price2
+         FROM (
+             SELECT team_id, game_id, player_id
+             FROM player_stats
+         ) P JOIN (
+             SELECT game_id, team_id, a_team_id, moneyline_price1, moneyline_price2
+             FROM betting_data
+             WHERE moneyline_price1 > 0 OR moneyline_price2 > 0
+         ) B ON P.game_id = B.game_id AND
+                ((P.team_id = B.team_id AND B.moneyline_price1 > 0) OR (P.team_id = B.a_team_id AND B.moneyline_price2 > 0))
+     ) P ON P.team_id = G.team_id AND P.game_id = G.game_id
+     GROUP BY P.player_id
+     HAVING total_games >= 10
+  ) P ON P.player_id = P2.person_id
+  ORDER BY money_per_game DESC
+  LIMIT 15;
+  `, 
+  (err, data) => {
+    if (err || data.length == 0) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data);
+    }
+  })
 }
 
 module.exports = {
@@ -793,6 +898,9 @@ module.exports = {
   player_search,
   team_search,
   game_search,
-  team_underdog_winrate,
+  // team_underdog_winrate,
   trivia_top_matchups,
+  trivia_arbitrage,
+  trivia_spread_players,
+  trivia_underdog_players,
 };
