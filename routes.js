@@ -560,14 +560,14 @@ const middling_total_betting = async function (req, res) {
 const middling_spread_betting = async function (req, res) {
   let threshold = req.query.threshold;
   connection.query(
-    `SELECT SUM(IF(G1.pts + G2.pts > B1.total1, 10000 / ABS(B1.total_price1), IF(G1.pts + G2.pts = B1.total1, 0, -100)))
-        + SUM(IF(G1.pts + G2.pts < B2.total1, 10000 / ABS(B2.total_price1), IF(G1.pts + G2.pts = B2.total1, 0, -100))) AS middle_total_money,
-        SUM(IF(G1.pts + G2.pts > B1.total1 AND G1.pts + G2.pts < B2.total1, 1, 0)) AS middles_total_won,
-        SUM(IF(G1.pts + G2.pts > B1.total1 AND G1.pts + G2.pts < B2.total1, 0, 1)) AS middles_total_lost
-        FROM betting_data B1 JOIN betting_data B2 on B1.game_id = B2.game_id
-        JOIN game_data G1 ON B1.game_id = G1.game_id AND B1.team_id = G1.team_id
-        JOIN game_data G2 ON B1.game_id = G2.game_id AND B1.a_team_id = G2.team_id
-        WHERE B1.total1 <= B2.total1 - ${threshold};`,
+    `SELECT SUM(IF(G1.pts - G2.pts < -1 * B1.spread1, 10000 / ABS(B1.spread_price1), IF(G1.pts - G2.pts = -1 * B1.spread1, 0, -100)))
+    + SUM(IF(G1.pts - G2.pts > -1 * B2.spread1, 10000 / ABS(B2.spread_price1), IF(G1.pts - G2.pts = -1 * B2.spread1, 0, -100))) AS middle_total_money,
+SUM(IF(G1.pts - G2.pts < -1 * B1.spread1 AND G1.pts - G2.pts > -1 * B2.spread1, 1, 0)) AS middles_total_won,
+SUM(IF(G1.pts - G2.pts < -1 * B1.spread1 AND G1.pts - G2.pts > -1 * B2.spread1, 0, 1)) AS middles_total_lost
+FROM betting_data B1 JOIN betting_data B2 ON B1.game_id = B2.game_id
+JOIN game_data G1 ON B1.game_id = G1.game_id AND B1.team_id = G1.team_id
+JOIN game_data G2 ON B1.game_id = G2.game_id AND B1.a_team_id = G2.team_id
+WHERE B1.spread1 <= B2.spread1 - ${threshold};`,
     (err, data) => {
       if (err || data.length === 0) {
         console.log(err);
@@ -734,6 +734,42 @@ ORDER BY expected_moneyline_win_or_loss DESC;`,
   );
 };
 
+const trivia_top_matchups = async function(req, res) {
+  connection.query(`
+  WITH total_game_pts AS (
+    SELECT G1.game_id, G1.pts + G2.pts AS total_pts
+    FROM game_data G1 JOIN game_data G2 on G1.game_id = G2.game_id AND G1.a_team_id = G2.team_id
+    WHERE G1.team_id < G2.team_id
+ ),
+ player_stats2 AS (
+    SELECT PS.pts, PS.player_id, PS.game_id, PS.team_id, P.display_first_last
+    FROM player_stats PS JOIN players P on PS.player_id = P.person_id
+ )
+ SELECT PS.id1, PS.id2, PS.name1, PS.name2, AVG((PS.pair_pts / G.total_pts)) AS avg_pct_pts, COUNT(*) AS total_games
+ FROM total_game_pts G JOIN (
+    SELECT PS1.player_id AS id1, PS2.player_id AS id2,
+           PS1.display_first_last AS name1, PS2.display_first_last AS name2,
+           PS1.game_id, PS1.pts + PS2.pts AS pair_pts
+    FROM player_stats2 PS1 JOIN (
+        SELECT player_id, pts, team_id, game_id, display_first_last
+        FROM player_stats2
+    ) PS2 ON PS1.game_id = PS2.game_id AND PS1.player_id < PS2.player_id AND PS1.team_id <> PS2.team_id
+ ) PS ON G.game_id = PS.game_id
+ GROUP BY PS.id1, PS.id2
+ HAVING total_games >= 5
+ ORDER BY avg_pct_pts DESC
+ LIMIT 15;
+  `, (err, data) => {
+    if (err || data.length == 0) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data);
+    }
+  }
+  );
+}
+
 module.exports = {
   game,
   game_players,
@@ -758,4 +794,5 @@ module.exports = {
   team_search,
   game_search,
   team_underdog_winrate,
+  trivia_top_matchups,
 };

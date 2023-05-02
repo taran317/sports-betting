@@ -5,6 +5,7 @@ import GamePage from './game';
 import GameCard from './gamecard';
 // import PlayerPage from './PlayerPage';
 import TeamPage from './team';
+import TriviaPage from './trivia';
 
 function App() {
     return (
@@ -13,6 +14,7 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/game/:gameId" element={<GameCard />} />
                 <Route path="/team" element={<TeamPage />} />
+                <Route path="/trivia" element={<TriviaPage />} />
             </Routes>
         </Router>
     );

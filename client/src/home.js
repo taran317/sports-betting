@@ -18,6 +18,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { ColorModeScript } from '@chakra-ui/color-mode';
 import GamePage from './game';
 import TeamPage from './team';
+import TriviaPage from './trivia';
 import { IconButton, useColorMode } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 import PlayerPage from './player';
@@ -76,6 +77,7 @@ const HomePage = () => {
                             <Tab>Game</Tab>
                             <Tab>Player</Tab>
                             <Tab>Team</Tab>
+                            <Tab>Trivia</Tab>
                         </TabList>
 
                         <TabPanels>
@@ -87,6 +89,9 @@ const HomePage = () => {
                             </TabPanel>
                             <TabPanel>
                                 <TeamPage />
+                            </TabPanel>
+                            <TabPanel>
+                                <TriviaPage />
                             </TabPanel>
                         </TabPanels>
                     </Tabs>
