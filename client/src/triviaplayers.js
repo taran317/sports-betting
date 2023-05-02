@@ -72,21 +72,39 @@ const TriviaPlayersPage = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
         if (!isNaN(minGamesSpreadInput)) {
-            setMinGamesSpread(minGamesSpreadInput);
+            if (minGamesSpreadInput < 0) {
+                setMinGamesSpread(0);
+            } else if (minGamesSpreadInput > 1000) {
+                setMinGamesSpread(1000);
+            } else {
+                setMinGamesSpread(minGamesSpreadInput);
+            }
         }
     };
 
     const handleSubmit2 = (event) => {
         event.preventDefault();
         if (!isNaN(minMatchupGamesInput)) {
-            setMinMatchupGames(minMatchupGamesInput);
+            if (minMatchupGamesInput < 0) {
+                setMinMatchupGames(0);
+            } else if (minMatchupGamesInput > 57) {
+                setMinMatchupGames(57);
+            } else {
+                setMinMatchupGames(minMatchupGamesInput);
+            }
         }
     };
 
     const handleSubmit3 = (event) => {
         event.preventDefault();
         if (!isNaN(minUnderdogGamesInput)) {
-            setMinUnderdogGames(minUnderdogGamesInput);
+            if (minUnderdogGamesInput < 0) {
+                setMinUnderdogGames(0);
+            } else if (minUnderdogGamesInput > 517) {
+                setMinUnderdogGames(517);
+            } else {
+                setMinUnderdogGames(minUnderdogGamesInput);
+            }
         }
     };
 
