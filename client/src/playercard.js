@@ -43,6 +43,8 @@ const PlayerCard = ({ player }) => {
       }
     };
     if (player) {
+        setUnderdogStats(null);
+        setSpreadStats(null);
       fetchData();
     }
   }, [player]);
