@@ -764,6 +764,7 @@ const trivia_top_matchups = async function(req, res) {
 //   `
 `
   SELECT * FROM topmatchups
+  WHERE total_games >= ${req.query.minimum_games}
  ORDER BY avg_pct_pts DESC
  LIMIT 15;
   `, (err, data) => {
@@ -800,7 +801,7 @@ const trivia_spread_players = async function(req, res) {
     SELECT P.player_id, COUNT(*) AS total_games
     FROM player_stats P
     GROUP BY P.player_id
-    HAVING total_games >= 50
+    HAVING total_games >= ${req.query.minimum_games}
  ), pts_difference AS (
     SELECT G1.pts - G2.pts AS pts_difference, G2.pts - G1.pts AS pts_difference2, G1.game_id
     FROM game_data G1 JOIN game_data G2 on G1.game_id = G2.game_id AND G1.a_team_id = G2.team_id
@@ -862,7 +863,7 @@ const trivia_underdog_players = async function(req, res) {
                 ((P.team_id = B.team_id AND B.moneyline_price1 > 0) OR (P.team_id = B.a_team_id AND B.moneyline_price2 > 0))
      ) P ON P.team_id = G.team_id AND P.game_id = G.game_id
      GROUP BY P.player_id
-     HAVING total_games >= 25
+     HAVING total_games >= ${req.query.minimum_games}
   ) P ON P.player_id = P2.person_id
   ORDER BY money_per_game DESC
   LIMIT 15;

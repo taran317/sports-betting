@@ -79,7 +79,7 @@ const TriviaPage = () => {
           </Text>
           <form onSubmit={handleSubmit}>
             <Grid templateColumns="repeat(3, 1fr)" gap={2}>
-            <FormLabel>Threshold (gap between <br></br> spreads/totals required):</FormLabel>
+            <FormLabel><b>Threshold</b> (gap between <br></br> spreads/totals required):</FormLabel>
                 <FormControl>
                     <Input
                         value={thresholdInput}
