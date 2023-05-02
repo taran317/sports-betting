@@ -43,6 +43,8 @@ const PlayerCard = ({ player }) => {
       }
     };
     if (player) {
+        setUnderdogStats(null);
+        setSpreadStats(null);
       fetchData();
     }
   }, [player]);
@@ -127,49 +129,6 @@ return (
           </Table>
         </Box>
         <Box w="100%">
-          <Text fontSize="xl" fontWeight="bold">
-            Shooting Averages
-          </Text>
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>FG</Th>
-                <Th>FG%</Th>
-                <Th>FT</Th>
-                <Th>FT%</Th>
-                <Th>3P</Th>
-                <Th>3P%</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              <Tr>
-                <Td>{`${player.fgm ? player.fgm.toFixed(1) : "N/A"} / ${
-                  player.fga ? player.fga.toFixed(1) : "N/A"
-                }`}</Td>
-                <Td>
-                  {player.fga && player.fgm
-                    ? ((player.fgm / player.fga) * 100).toFixed(1) + "%"
-                    : "N/A"}
-                </Td>
-                <Td>{`${player.ftm ? player.ftm.toFixed(1) : "N/A"} / ${
-                  player.fta ? player.fta.toFixed(1) : "N/A"
-                }`}</Td>
-                <Td>
-                  {player.fta && player.ftm
-                    ? ((player.ftm / player.fta) * 100).toFixed(1) + "%"
-                    : "N/A"}
-                </Td>
-                <Td>{`${player.fg3m ? player.fg3m.toFixed(1) : "N/A"} / ${
-                  player.fg3a ? player.fg3a.toFixed(1) : "N/A"
-                }`}</Td>
-                <Td>
-                  {player.fg3a && player.fg3m
-                    ? ((player.fg3m / player.fg3a) * 100).toFixed(1) + "%"
-                    : "N/A"}
-                </Td>
-              </Tr>
-            </Tbody>
-          </Table>
           <Text fontSize="xl" fontWeight="bold">
             Shooting Averages
           </Text>
