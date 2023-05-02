@@ -220,14 +220,16 @@ return (
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th>Total Games</Th>
+                  <Th>Underdog Games</Th>
+                  <Th>Underdog Wins</Th>
                   <Th>Total Money</Th>
-                  <Th>Money per Game</Th>
+                  <Th>Money Per Game</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 <Tr>
                   <Td>{underdogStats.total_games || "N/A"}</Td>
+                  <Td>{underdogStats.underdog_wins || "N/A"}</Td>
                   <Td>{underdogStats.total_money || "N/A"}</Td>
                   <Td>{underdogStats.money_per_game || "N/A"}</Td>
                 </Tr>

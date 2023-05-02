@@ -97,7 +97,8 @@ const TriviaPlayersPage = () => {
                 <Thead>
                     <Tr>
                         <Th>Player</Th>
-                        <Th>Total Games</Th>
+                        <Th>Underdog Games</Th>
+                        <Th>Underdog Wins</Th>
                         <Th>Total Money</Th>
                         <Th>Money Per Game</Th>
                     </Tr>
@@ -107,6 +108,7 @@ const TriviaPlayersPage = () => {
                                     <Tr key={index}>
                                         <Td>{x.display_first_last}</Td>
                                         <Td>{x.total_games}</Td>
+                                        <Td>{x.underdog_wins}</Td>
                                         <Td>{x.total_money.toFixed(2)}</Td>
                                         <Td>{x.money_per_game.toFixed(2)}</Td>
                                     </Tr>

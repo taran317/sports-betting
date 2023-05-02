@@ -185,13 +185,14 @@ const player_average_stats = async function (req, res) {
 const player_underdog = async function (req, res) {
   connection.query(
     `
-    SELECT P.player_id, P2.display_first_last, P.total_games, P.total_money, P.total_money / P.total_games AS money_per_game
+    SELECT P.player_id, P2.display_first_last, P.total_games, P.total_money, P.total_money / P.total_games AS money_per_game, P.underdog_wins
     FROM (
         SELECT person_id, display_first_last
         FROM players
     ) P2 JOIN (
         SELECT P.player_id, COUNT(P.game_id) AS total_games,
-               SUM(IF(G.wl = 'W', IF(P.moneyline_price1 > 0, P.moneyline_price1, P.moneyline_price2), -100)) AS total_money
+               SUM(IF(G.wl = 'W', IF(P.moneyline_price1 > 0, P.moneyline_price1, P.moneyline_price2), -100)) AS total_money,
+               SUM(IF(G.wl = 'W', 1, 0)) AS underdog_wins
         FROM (
             SELECT game_id, team_id,  wl
             FROM game_data
@@ -204,7 +205,7 @@ const player_underdog = async function (req, res) {
             ) P JOIN (
                 SELECT game_id, team_id, a_team_id, moneyline_price1, moneyline_price2
                 FROM betting_data
-                WHERE moneyline_price1 > 0 OR moneyline_price2 > 0
+                WHERE (moneyline_price1 > 0 OR moneyline_price2 > 0) AND book_name = '5Dimes'
             ) B ON P.game_id = B.game_id AND
                    ((P.team_id = B.team_id AND B.moneyline_price1 > 0) OR (P.team_id = B.a_team_id AND B.moneyline_price2 > 0))
         ) P ON P.team_id = G.team_id AND P.game_id = G.game_id
@@ -837,13 +838,14 @@ const trivia_spread_players = async function(req, res) {
 }
 
 const trivia_underdog_players = async function(req, res) {
-  connection.query(`SELECT P.player_id, P2.display_first_last, P.total_games, P.total_money, P.total_money / P.total_games AS money_per_game
+  connection.query(`SELECT P.player_id, P2.display_first_last, P.total_games, P.total_money, P.total_money / P.total_games AS money_per_game, P.underdog_wins
   FROM (
      SELECT person_id, display_first_last
      FROM players
   ) P2 JOIN (
      SELECT P.player_id, COUNT(P.game_id) AS total_games,
-            SUM(IF(G.wl = 'W', IF(P.moneyline_price1 > 0, P.moneyline_price1, P.moneyline_price2), -100)) AS total_money
+            SUM(IF(G.wl = 'W', IF(P.moneyline_price1 > 0, P.moneyline_price1, P.moneyline_price2), -100)) AS total_money,
+            SUM(IF(G.wl = 'W', 1, 0)) AS underdog_wins
      FROM (
          SELECT game_id, team_id,  wl
          FROM game_data
@@ -855,12 +857,12 @@ const trivia_underdog_players = async function(req, res) {
          ) P JOIN (
              SELECT game_id, team_id, a_team_id, moneyline_price1, moneyline_price2
              FROM betting_data
-             WHERE moneyline_price1 > 0 OR moneyline_price2 > 0
+             WHERE (moneyline_price1 > 0 OR moneyline_price2 > 0) AND book_name = '5Dimes'
          ) B ON P.game_id = B.game_id AND
                 ((P.team_id = B.team_id AND B.moneyline_price1 > 0) OR (P.team_id = B.a_team_id AND B.moneyline_price2 > 0))
      ) P ON P.team_id = G.team_id AND P.game_id = G.game_id
      GROUP BY P.player_id
-     HAVING total_games >= 10
+     HAVING total_games >= 25
   ) P ON P.player_id = P2.person_id
   ORDER BY money_per_game DESC
   LIMIT 15;
