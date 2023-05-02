@@ -39,6 +39,7 @@ app.get('/team/underdog-winrate', routes.team_underdog_winrate);
 
 app.get('/trivia/middling_total', routes.middling_total_betting);
 app.get('/trivia/middling_spread', routes.middling_spread_betting);
+app.get('/trivia/top_matchups', routes.trivia_top_matchups);
 
 
 
