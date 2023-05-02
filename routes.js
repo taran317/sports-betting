@@ -779,13 +779,17 @@ const trivia_top_matchups = async function(req, res) {
 }
 
 const trivia_arbitrage = async function(req, res) {
+    let page = parseInt(req.query["page"]) || 1;
+    let resultsPerPage = 20;
+    let offset = (page - 1) * resultsPerPage;
+
   connection.query(`SELECT B1.book_name AS book1, B2.book_name AS book2, B1.spread_price1, B2.spread_price2, G.matchup, G.game_date, 1 / IF(B1.spread_price1 < 0, 1 + 100 / ABS(B1.spread_price1), B1.spread_price1 / 100 + 1)
   + 1 / IF(B2.spread_price2 < 0, 1 + 100 / ABS(B2.spread_price2), B2.spread_price2 / 100 + 1) AS arbitrage_percentage
 FROM betting_data B1 JOIN betting_data B2 ON B1.game_id = B2.game_id
   JOIN game_data G ON B1.game_id = G.game_id AND B1.team_id = G.team_id
 WHERE 1 / IF(B1.spread_price1 < 0, 1 + 100 / ABS(B1.spread_price1), B1.spread_price1 / 100 + 1)
   + 1 / IF(B2.spread_price2 < 0, 1 + 100 / ABS(B2.spread_price2), B2.spread_price2 / 100 + 1) < 1
-  LIMIT 10;`, 
+  LIMIT ? OFFSET ?;`, [resultsPerPage, offset],
   (err, data) => {
     if (err || data.length == 0) {
       console.log(err);

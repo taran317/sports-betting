@@ -23,6 +23,7 @@ const TriviaPage = () => {
     const [arbitrage, setArbitrage] = useState([]);
     const [threshold, setThreshold] = useState(2);
     const [thresholdInput, setThresholdInput] = useState(2);
+    const [page, setPage] = useState(1);
 
     const toast = useToast();
 
@@ -71,6 +72,33 @@ const TriviaPage = () => {
             }
         }
     };
+
+    const fetchArbitrageData = async (page) => {
+        try {
+            console.log(`/trivia/arbitrage`);
+            const arbRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/trivia/arbitrage?page=${page}`);
+            setArbitrage(arbRes.data);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    useEffect(() => {
+        fetchArbitrageData(page);
+    }, [page]);
+
+    const handlePrevPage = () => {
+        if (page > 1) {
+            setPage(page - 1);
+            fetchArbitrageData(page - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        setPage(page + 1);
+        fetchArbitrageData(page + 1);
+    };
+
 
     return (
         <Flex direction="row">
@@ -149,6 +177,14 @@ const TriviaPage = () => {
                                 ))}
                 </Tbody>
                 </Table>
+            <Center mt={4}>
+                <Button onClick={handlePrevPage} disabled={page === 1} mr={4}>
+                    Previous
+                </Button>
+                <Button onClick={handleNextPage}>
+                    Next
+                </Button>
+            </Center>
         </VStack>
         </Flex>
     );
