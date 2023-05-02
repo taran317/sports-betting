@@ -71,7 +71,7 @@ const TriviaPlayersPage = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        if (!isNaN(minGamesSpreadInput)) {
+        if (!isNaN(minGamesSpreadInput) && minGamesSpreadInput.trim().length !== 0) {
             if (minGamesSpreadInput < 0) {
                 setMinGamesSpread(0);
             } else if (minGamesSpreadInput > 1000) {
@@ -84,7 +84,7 @@ const TriviaPlayersPage = () => {
 
     const handleSubmit2 = (event) => {
         event.preventDefault();
-        if (!isNaN(minMatchupGamesInput)) {
+        if (!isNaN(minMatchupGamesInput) && minMatchupGamesInput.trim().length !== 0) {
             if (minMatchupGamesInput < 0) {
                 setMinMatchupGames(0);
             } else if (minMatchupGamesInput > 57) {
@@ -97,7 +97,7 @@ const TriviaPlayersPage = () => {
 
     const handleSubmit3 = (event) => {
         event.preventDefault();
-        if (!isNaN(minUnderdogGamesInput)) {
+        if (!isNaN(minUnderdogGamesInput) && minUnderdogGamesInput.trim().length !== 0) {
             if (minUnderdogGamesInput < 0) {
                 setMinUnderdogGames(0);
             } else if (minUnderdogGamesInput > 517) {
