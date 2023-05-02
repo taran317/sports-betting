@@ -205,7 +205,7 @@ return (
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th>Count</Th>
+                  <Th>Spread Covers</Th>
                   <Th>Total Games</Th>
                   <Th>Spread Percentage</Th>
                 </Tr>

@@ -20,18 +20,18 @@ const TriviaPlayersPage = () => {
     const [playerMatchups, setPlayerMatchups] = useState([]);
     const [spreadPlayers, setSpreadPlayers] = useState([]);
     const [underdogPlayers, setUnderdogPlayers] = useState([]);
+    const [minGamesSpread, setMinGamesSpread] = useState(50);
+    const [minGamesSpreadInput, setMinGamesSpreadInput] = useState(50);
+    const [minMatchupGames, setMinMatchupGames] = useState(5);
+    const [minMatchupGamesInput, setMinMatchupGamesInput] = useState(5);
+    const [minUnderdogGames, setMinUnderdogGames] = useState(10);
+    const [minUnderdogGamesInput, setMinUnderdogGamesInput] = useState(10);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                console.log(`/trivia/top_matchups`);
-                const matchupRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/trivia/top_matchups`);
-                setPlayerMatchups(matchupRes.data);
-                console.log(`/trivia/spread_players`);
-                const spreadRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/trivia/spread_players`);
-                setSpreadPlayers(spreadRes.data);
                 console.log(`/trivia/underdog_players`);
-                const underdogRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/trivia/underdog_players`);
+                const underdogRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/trivia/underdog_players/?minimum_games=${minUnderdogGames}`);
                 setUnderdogPlayers(underdogRes.data);
             } catch(err) {
                 console.log(err);
@@ -39,7 +39,56 @@ const TriviaPlayersPage = () => {
         }
 
         fetchData();
-    }, []);
+    }, [minUnderdogGames]);
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                console.log(`/trivia/spread_players`);
+                const spreadRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/trivia/spread_players/?minimum_games=${minGamesSpread}`);
+                setSpreadPlayers(spreadRes.data);
+            } catch(err) {
+                console.log(err);
+            }
+        }
+
+        fetchData();
+    }, [minGamesSpread]);
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                console.log(`/trivia/top_matchups`);
+                const matchupRes = await axios.get(`${process.env.REACT_APP_EXPRESS_APP_API_URL}/trivia/top_matchups/?minimum_games=${minMatchupGames}`);
+                setPlayerMatchups(matchupRes.data);
+            } catch(err) {
+                console.log(err);
+            }
+        }
+
+        fetchData();
+    }, [minMatchupGames]);
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        if (!isNaN(minGamesSpreadInput)) {
+            setMinGamesSpread(minGamesSpreadInput);
+        }
+    };
+
+    const handleSubmit2 = (event) => {
+        event.preventDefault();
+        if (!isNaN(minMatchupGamesInput)) {
+            setMinMatchupGames(minMatchupGamesInput);
+        }
+    };
+
+    const handleSubmit3 = (event) => {
+        event.preventDefault();
+        if (!isNaN(minUnderdogGamesInput)) {
+            setMinUnderdogGames(minUnderdogGamesInput);
+        }
+    };
 
     return (
         <Flex direction="row">
@@ -47,6 +96,20 @@ const TriviaPlayersPage = () => {
             <Text fontSize="xl" fontWeight="bold">
             Top Player Matchups
           </Text>
+          <form onSubmit={handleSubmit2}>
+          <Grid templateColumns="repeat(3, 1fr)" gap={2}>
+            <FormLabel><b>Minimum Matchup Games</b></FormLabel>
+                <FormControl>
+                    <Input
+                        value={minMatchupGamesInput}
+                        onChange={(e) => setMinMatchupGamesInput(e.target.value)}
+                    />
+                </FormControl>
+                <Button type="submit" colorScheme="teal" ml={2}>
+                        Submit
+                    </Button>
+            </Grid>
+            </form>
             <Table mt={6} variant="simple" width="100%">
                 <Thead>
                     <Tr>
@@ -70,6 +133,20 @@ const TriviaPlayersPage = () => {
             <Text fontSize="xl" fontWeight="bold">
             Top Players for Spread Cover
           </Text>
+          <form onSubmit={handleSubmit}>
+            <Grid templateColumns="repeat(3, 1fr)" gap={2}>
+            <FormLabel><b>Minimum Total Games</b></FormLabel>
+                <FormControl>
+                    <Input
+                        value={minGamesSpreadInput}
+                        onChange={(e) => setMinGamesSpreadInput(e.target.value)}
+                    />
+                </FormControl>
+                <Button type="submit" colorScheme="teal" ml={2}>
+                        Submit
+                    </Button>
+            </Grid>
+            </form>
             <Table mt={6} variant="simple" width="100%">
                 <Thead>
                     <Tr>
@@ -93,6 +170,20 @@ const TriviaPlayersPage = () => {
             <Text fontSize="xl" fontWeight="bold">
             Top Players as Underdogs
           </Text>
+          <form onSubmit={handleSubmit3}>
+          <Grid templateColumns="repeat(3, 1fr)" gap={2}>
+            <FormLabel><b>Minimum Underdog Games</b></FormLabel>
+                <FormControl>
+                    <Input
+                        value={minUnderdogGamesInput}
+                        onChange={(e) => setMinUnderdogGamesInput(e.target.value)}
+                    />
+                </FormControl>
+                <Button type="submit" colorScheme="teal" ml={2}>
+                        Submit
+                    </Button>
+            </Grid>
+            </form>
             <Table mt={6} variant="simple" width="100%">
                 <Thead>
                     <Tr>
