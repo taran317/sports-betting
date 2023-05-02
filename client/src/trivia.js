@@ -62,7 +62,13 @@ const TriviaPage = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
         if (!isNaN(thresholdInput)) {
-            setThreshold(thresholdInput);
+            if (thresholdInput < 0) {
+                setThreshold(0);
+            } else if (thresholdInput > 20) {
+                setThreshold(20);
+            } else {
+                setThreshold(thresholdInput);
+            }
         }
     };
 
