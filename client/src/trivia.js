@@ -151,6 +151,9 @@ const TriviaPage = () => {
             <Text fontSize="xl" fontWeight="bold">
             Arbitrage Opportunities
           </Text>
+            <Text fontSize="m" w="70%">
+                Arbitrage betting is when odds line up between two different books on the same game such that you can guarantee a profit by betting a certain amount on one provider and a certain amount on the other provider. The arbitrage percentage is a measure of how drastic the difference in odds are. An opportunity is profitable only if the arbitrage percentage is less than 100%.
+            </Text>
             <Table mt={6} variant="simple" width="100%">
                 <Thead>
                     <Tr>
