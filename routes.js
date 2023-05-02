@@ -549,7 +549,7 @@ const middling_total_betting = async function (req, res) {
         JOIN game_data G2 ON B1.game_id = G2.game_id AND B1.a_team_id = G2.team_id
         WHERE B1.total1 <= B2.total1 - ${threshold};`,
     (err, data) => {
-      if (err || data.length === 0) {
+      if (err) {
         console.log(err);
       } else {
         res.json(data);
@@ -570,7 +570,7 @@ JOIN game_data G1 ON B1.game_id = G1.game_id AND B1.team_id = G1.team_id
 JOIN game_data G2 ON B1.game_id = G2.game_id AND B1.a_team_id = G2.team_id
 WHERE B1.spread1 <= B2.spread1 - ${threshold};`,
     (err, data) => {
-      if (err || data.length === 0) {
+      if (err) {
         console.log(err);
       } else {
         res.json(data);
