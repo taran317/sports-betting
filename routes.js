@@ -72,6 +72,7 @@ const game_players = async function (req, res) {
 };
 
 // GET /game_betting/:game_id
+// list of all betting/books data for specific game_id
 const game_betting = async function (req, res) {
   connection.query(
     `
@@ -179,8 +180,7 @@ const player_average_stats = async function (req, res) {
 };
 
 /*
-    GET /player/:player_id/spread_performance
-    Returns num games the player covered the spread, total games, and percentage of games the player covered the spread
+  Returns the specified underdog player's betting statistics and underdog wins
  */
 const player_underdog = async function (req, res) {
   connection.query(
@@ -223,6 +223,10 @@ const player_underdog = async function (req, res) {
   );
 };
 
+/*
+    GET /player/:player_id/spread_performance
+    Returns num games the player covered the spread, total games, and percentage of games the player covered the spread
+ */
 const player_spread_performance = async function (req, res) {
   connection.query(
     `
@@ -269,7 +273,7 @@ const player_spread_performance = async function (req, res) {
   );
 };
 
-// TODO: Add the query into the function
+// Fetches aggregate data for all games played between 2 teams.
 const matchup_stats = async function (req, res) {
   connection.query(
     `WITH win_loss AS (
@@ -332,6 +336,7 @@ const matchup_stats = async function (req, res) {
   );
 };
 
+// Returns the top specific player matchups for a given game
 const matchup_top_pairs = async function (req, res) {
   connection.query(
     `
@@ -368,6 +373,7 @@ const matchup_top_pairs = async function (req, res) {
   );
 };
 
+// Returns all information about a team, including average stats and win/loss record
 const team = async function (req, res) {
   let team1ID = req.params.team_id;
   connection.query(
@@ -387,6 +393,7 @@ const team = async function (req, res) {
   );
 };
 
+// Returns the betting data about a particular team by averaging data over games and presenting results per book
 const team_game_betting_data = async function (req, res) {
   let team1ID = req.params.team_id;
   connection.query(
@@ -412,6 +419,7 @@ const team_game_betting_data = async function (req, res) {
   );
 };
 
+// Return a team’s specific underdog data, including wins, total games, and percentage underdog win rate
 const team_underdog_wins = async function (req, res) {
   let team1ID = req.params.team_id;
   connection.query(
@@ -444,6 +452,7 @@ const team_underdog_wins = async function (req, res) {
   );
 };
 
+// Returns the underdog team's betting data information for when they are underdogs
 const team_underdog_money = async function (req, res) {
   let team1ID = req.params.team_id;
   connection.query(
@@ -477,6 +486,7 @@ const team_underdog_money = async function (req, res) {
   );
 };
 
+// Return a team's top players by average PRA
 const team_top_players = async function (req, res) {
   let team_id = req.params.team_id;
   let num_players = req.query.num_players;
@@ -504,6 +514,7 @@ LIMIT ${num_players}`,
   );
 };
 
+// Return a team's percentage of hitting their spread
 const team_spread_covering_percentage = async function (req, res) {
   let team_id = req.params.team_id;
   connection.query(
@@ -537,6 +548,7 @@ const team_spread_covering_percentage = async function (req, res) {
 
 // trivia page
 
+// return the middling betting returns (for total points) aggregated across all games and books
 const middling_total_betting = async function (req, res) {
   let threshold = req.query.threshold;
   connection.query(
@@ -558,6 +570,7 @@ const middling_total_betting = async function (req, res) {
   );
 };
 
+// return the middling betting returns (for point spread) aggregated across all games and books
 const middling_spread_betting = async function (req, res) {
   let threshold = req.query.threshold;
   connection.query(
@@ -579,6 +592,7 @@ WHERE B1.spread1 <= B2.spread1 - ${threshold};`,
   );
 };
 
+// Search for players (with optional parameters for filtering)
 const player_search = async function (req, res) {
   let name_substring = req.query.name;
   let page = parseInt(req.query["page"]) || 1;
@@ -602,6 +616,7 @@ LIMIT ? OFFSET ?;`,
   );
 };
 
+// Search for teams (with optional parameters for filtering)
 const team_search = async function (req, res) {
   let substring = req.query["name-or-abbreviation"];
   connection.query(
@@ -618,6 +633,7 @@ const team_search = async function (req, res) {
   );
 };
 
+// Search for games (with optional parameters for filtering around team names, years, and minimum points)
 const game_search = async function (req, res) {
   let team1_substring = req.query["name-or-abbreviation1"]
     ? String(req.query["name-or-abbreviation1"])
@@ -735,33 +751,34 @@ LIMIT ? OFFSET ?;`,
 //   );
 // };
 
+// Fetches the top matchups of players based on % of total points scored by these two players in games with both of them playing
 const trivia_top_matchups = async function(req, res) {
   connection.query(
-    //`
-//   WITH total_game_pts AS (
-//     SELECT G1.game_id, G1.pts + G2.pts AS total_pts
-//     FROM game_data G1 JOIN game_data G2 on G1.game_id = G2.game_id AND G1.a_team_id = G2.team_id
-//     WHERE G1.team_id < G2.team_id
-//  ),
-//  player_stats2 AS (
-//     SELECT PS.pts, PS.player_id, PS.game_id, PS.team_id, P.display_first_last
-//     FROM player_stats PS JOIN players P on PS.player_id = P.person_id
-//  )
-//  SELECT PS.id1, PS.id2, PS.name1, PS.name2, AVG((PS.pair_pts / G.total_pts)) AS avg_pct_pts, COUNT(*) AS total_games
-//  FROM total_game_pts G JOIN (
-//     SELECT PS1.player_id AS id1, PS2.player_id AS id2,
-//            PS1.display_first_last AS name1, PS2.display_first_last AS name2,
-//            PS1.game_id, PS1.pts + PS2.pts AS pair_pts
-//     FROM player_stats2 PS1 JOIN (
-//         SELECT player_id, pts, team_id, game_id, display_first_last
-//         FROM player_stats2
-//     ) PS2 ON PS1.game_id = PS2.game_id AND PS1.player_id < PS2.player_id AND PS1.team_id <> PS2.team_id
-//  ) PS ON G.game_id = PS.game_id
-//  GROUP BY PS.id1, PS.id2
-//  HAVING total_games >= 5
-//  ORDER BY avg_pct_pts DESC
-//  LIMIT 15;
-//   `
+ //    `
+ //  WITH total_game_pts AS (
+ //    SELECT G1.game_id, G1.pts + G2.pts AS total_pts
+ //    FROM game_data G1 JOIN game_data G2 on G1.game_id = G2.game_id AND G1.a_team_id = G2.team_id
+ //    WHERE G1.team_id < G2.team_id
+ // ),
+ // player_stats2 AS (
+ //    SELECT PS.pts, PS.player_id, PS.game_id, PS.team_id, P.display_first_last
+ //    FROM player_stats PS JOIN players P on PS.player_id = P.person_id
+ // )
+ // SELECT PS.id1, PS.id2, PS.name1, PS.name2, AVG((PS.pair_pts / G.total_pts)) AS avg_pct_pts, COUNT(*) AS total_games
+ // FROM total_game_pts G JOIN (
+ //    SELECT PS1.player_id AS id1, PS2.player_id AS id2,
+ //           PS1.display_first_last AS name1, PS2.display_first_last AS name2,
+ //           PS1.game_id, PS1.pts + PS2.pts AS pair_pts
+ //    FROM player_stats2 PS1 JOIN (
+ //        SELECT player_id, pts, team_id, game_id, display_first_last
+ //        FROM player_stats2
+ //    ) PS2 ON PS1.game_id = PS2.game_id AND PS1.player_id < PS2.player_id AND PS1.team_id <> PS2.team_id
+ // ) PS ON G.game_id = PS.game_id
+ // GROUP BY PS.id1, PS.id2
+ // HAVING total_games >= 5
+ // ORDER BY avg_pct_pts DESC
+ // LIMIT 15;
+ //  `
 `
   SELECT * FROM topmatchups
   WHERE total_games >= ${req.query.minimum_games}
@@ -778,6 +795,7 @@ const trivia_top_matchups = async function(req, res) {
   );
 }
 
+//This query returns arbitrage opportunity across historical books/games
 const trivia_arbitrage = async function(req, res) {
     let page = parseInt(req.query["page"]) || 1;
     let resultsPerPage = 20;
@@ -801,6 +819,7 @@ WHERE 1 / IF(B1.spread_price1 < 0, 1 + 100 / ABS(B1.spread_price1), B1.spread_pr
   })
 } 
 
+// Return the top players in terms of meeting their spreads, with a filter of the minimum number of games to consider when finding this (for consistency measurement)
 const trivia_spread_players = async function(req, res) {
   connection.query(`WITH total_games AS (
     SELECT P.player_id, COUNT(*) AS total_games
@@ -843,6 +862,7 @@ const trivia_spread_players = async function(req, res) {
   })
 }
 
+// Return the top players in terms of their money opportunity per game where they are underdogs (essentially, underdog returns for players)
 const trivia_underdog_players = async function(req, res) {
   connection.query(`SELECT P.player_id, P2.display_first_last, P.total_games, P.total_money, P.total_money / P.total_games AS money_per_game, P.underdog_wins
   FROM (
