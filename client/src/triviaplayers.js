@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import axios from 'axios';
 
-
+// Players Trivia page frontend component
 const TriviaPlayersPage = () => {
     
     const [playerMatchups, setPlayerMatchups] = useState([]);
@@ -26,6 +26,9 @@ const TriviaPlayersPage = () => {
     const [minMatchupGamesInput, setMinMatchupGamesInput] = useState(5);
     const [minUnderdogGames, setMinUnderdogGames] = useState(10);
     const [minUnderdogGamesInput, setMinUnderdogGamesInput] = useState(10);
+
+    // fetches data for default minimum game values initially
+    // recalled when inputs are updated
 
     useEffect(() => {
         async function fetchData() {
@@ -68,6 +71,9 @@ const TriviaPlayersPage = () => {
 
         fetchData();
     }, [minMatchupGames]);
+
+    // handles user updating input parameter
+    // sanitizes inputs
 
     const handleSubmit = (event) => {
         event.preventDefault();

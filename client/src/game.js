@@ -16,7 +16,7 @@ import { FiArrowDownCircle, FiArrowUpCircle } from 'react-icons/fi';
 import axios from 'axios';
 import GameCard from './gamecard';
 
-
+// frontend component for the game page
 const GamePage = () => {
     const [gameData, setGameData] = useState(null);
     const [team1Substring, setTeam1Substring] = useState('');
@@ -32,6 +32,7 @@ const GamePage = () => {
 
     const toast = useToast();
 
+    // scrolling effect functions
     const scrollToGameCard = () => {
         if (gameCardRef.current) {
             gameCardRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -57,6 +58,7 @@ const GamePage = () => {
         };
     }, []);
 
+    // handles search on game via various parameters
     const handleSearch = async (page = 1) => {
         try {
 

@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import axios from 'axios';
 
-
+// frontend component for trivia betting page
 const TriviaPage = () => {
     
     const hoverBgColor = useColorModeValue('gray.200', 'gray.700');
@@ -27,6 +27,8 @@ const TriviaPage = () => {
 
     const toast = useToast();
 
+    // loads middling data with default threshold initially
+    // recalled when threshold reset by user
     useEffect(() => {
         async function fetchData() {
             try {
@@ -46,6 +48,7 @@ const TriviaPage = () => {
         fetchData();
     }, [threshold]);
 
+    // loads arbitrage games with page 1
     useEffect(() => {
         async function fetchData2() {
             try {
@@ -60,6 +63,7 @@ const TriviaPage = () => {
         fetchData2();
     }, []);
 
+    // sanitizes inputs to threshold
     const handleSubmit = (event) => {
         event.preventDefault();
         if (!isNaN(thresholdInput)) {
@@ -86,6 +90,8 @@ const TriviaPage = () => {
     useEffect(() => {
         fetchArbitrageData(page);
     }, [page]);
+
+    // handles pagination
 
     const handlePrevPage = () => {
         if (page > 1) {

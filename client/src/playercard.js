@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 
+// frontend component for a player card
 const PlayerCard = ({ player }) => {
   const [underdogStats, setUnderdogStats] = useState(null);
   const [spreadStats, setSpreadStats] = useState(null);

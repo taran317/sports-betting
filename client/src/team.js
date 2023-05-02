@@ -15,7 +15,7 @@ import {
 import axios from 'axios';
 import TeamCard from './teamcard';
 
-
+// frontend component for the team page
 const TeamPage = () => {
     const [teamData, setTeamData] = useState(null);
     const [teamName, setTeamName] = useState('');
@@ -26,6 +26,7 @@ const TeamPage = () => {
 
     const toast = useToast();
 
+    // handles a search on player name
     const handleSearch = async (page = 1) => {
         try {
 

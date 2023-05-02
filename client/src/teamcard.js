@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react';
 import axios, { spread } from 'axios';
 
+// frontend component for a team card
 const TeamCard = ({ teamId }) => {
     const [localteamId, setLocalteamId] = useState(teamId);
     const [teamData, setteamData] = useState([]);
@@ -31,6 +32,7 @@ const TeamCard = ({ teamId }) => {
         setLocalteamId(teamId);
     }, [teamId]);
 
+    // loads in data for specific team
     useEffect(() => {
         if (!localteamId) return;
         async function fetchData() {

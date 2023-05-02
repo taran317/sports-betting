@@ -23,6 +23,7 @@ import {
 import axios from "axios";
 import PlayerCard from "./playercard";
 
+// PlayerPage frontend component
 const PlayerPage = () => {
   const [playerData, setPlayerData] = useState(null);
   const [playerName, setPlayerName] = useState("");
@@ -33,6 +34,7 @@ const PlayerPage = () => {
 
   const toast = useToast();
 
+  // handles a search on player name
   const handleSearch = async (page = 1) => {
     try {
       const queryParams = {
@@ -81,6 +83,7 @@ const PlayerPage = () => {
     handleSearch(page + 1);
   };
 
+  // calls routes to fetch data for player clicked
   const handlePlayerClick = (person_id) => {
     const curPlayer = playerData.filter((p) => p.person_id === person_id)[0];
     console.log(curPlayer);

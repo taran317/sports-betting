@@ -53,6 +53,7 @@ const ColorModeSwitcher = () => {
     );
 };
 
+// frontend component for the home page
 const HomePage = () => {
     const headingColor = useColorModeValue('gray.700', 'white');
     const buttonColor = 'primary.500';

@@ -17,6 +17,7 @@ import {
 import axios from 'axios';
 import {useLocation, useParams} from "react-router-dom";
 
+// frontend component for specific game card
 const GameCard = ({ gameId: propGameId}) => {
     const { gameId } = useParams();
     const [localGameId, setLocalGameId] = useState(propGameId || gameId);
@@ -33,6 +34,7 @@ const GameCard = ({ gameId: propGameId}) => {
         setLocalGameId(propGameId || gameId);
     }, [propGameId, gameId]);
 
+    // fetches data for game page
     useEffect(() => {
         if (!localGameId) return;
         async function fetchData() {
