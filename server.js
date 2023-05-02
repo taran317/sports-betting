@@ -24,6 +24,7 @@ app.get('/player/:player_id/games', routes.games_for_player);
 app.get('/player/:player_id', routes.player_information);
 app.get('/player/:player_id/average_stats', routes.player_average_stats);
 app.get('/player/:player_id/spread_performance', routes.player_spread_performance);
+app.get('/player/:player_id/player_underdog', routes.player_underdog);
 
 app.get('/team/search', routes.team_search);
 app.get('/team/:team_id', routes.team);
