@@ -93,8 +93,8 @@ const GamePage = () => {
         } catch (error) {
             console.log(error);
             toast({
-                title: 'Error',
-                description: 'An error occurred during the search. Please try again.',
+                title: 'No Results Found',
+                description: 'The query had no results :( \n- please try again!',
                 status: 'error',
                 duration: 5000,
                 isClosable: true,
