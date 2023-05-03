@@ -655,31 +655,6 @@ const game_search = async function (req, res) {
     ? `WHERE (name LIKE '%${team2_substring}%') OR (abbreviation LIKE '%${team2_substring}%')`
     : "";
 
-  //     const sqlQuery = `WITH potential_team1_by_name AS (
-  //     SELECT team_id
-  //     FROM teams
-  //     ${whereClauseTeam1}
-  // ), potential_team2_by_name AS (
-  //     SELECT team_id
-  //     FROM teams
-  //     ${whereClauseTeam2}
-  // )
-  // SELECT g1.game_id, g1.team_id as home_team_id, g1.a_team_id as away_team_id, t.name as home_team_name, t2.name as away_team_name,
-  //        t.abbreviation as home_team_abbreviation, t2.abbreviation as away_team_abbreviation, g1.pts as home_team_pts,
-  //        g2.pts as away_team_pts, g1.season_year as season_year
-  // FROM game_data g1
-  // JOIN game_data g2 ON g1.a_team_id = g2.team_id AND g1.game_id = g2.game_id
-  // JOIN teams t on g1.team_id = t.team_id
-  // JOIN teams t2 on g2.team_id = t2.team_id
-  // WHERE g1.team_id IN (SELECT * FROM potential_team1_by_name) AND g2.team_id IN (SELECT * FROM potential_team2_by_name)
-  //   AND ((g1.pts + g2.pts) >= COALESCE(?, 0))
-  //   AND ((g1.season_year >= COALESCE(?, 0)) OR (? IS NULL))
-  //   AND ((g1.season_year <= COALESCE(?, g1.season_year)) OR (? IS NULL))
-  // LIMIT ? OFFSET ?;`;
-  //
-  //     console.log(`Final SQL Query: ${sqlQuery}`);
-  //     console.log('Parameters:', [min_pts, min_year, min_year, max_year, max_year, resultsPerPage, offset]);
-
   connection.query(
     `WITH potential_team1_by_name AS (
     SELECT team_id
@@ -717,68 +692,9 @@ LIMIT ? OFFSET ?;`,
   );
 };
 
-// const team_underdog_winrate = async function (req, res) {
-//   connection.query(
-//     `WITH underdog_win_games AS (
-//    SELECT G.team_id, B.game_id, (-1*AVG(moneyline_price1)) as avg_moneyline_win, COUNT(*) as num_wins
-//    FROM betting_data B, game_data G
-//    WHERE B.game_id = G.game_id
-//        AND G.wl = "W"
-//        AND ((B.moneyline_price1 < 0))
-//    GROUP BY G.team_id
-// ), underdog_loss_games AS (
-//    SELECT G.team_id, B.game_id, AVG(moneyline_price1) as avg_moneyline_loss, COUNT(*) as num_losses
-//    FROM betting_data B, game_data G
-//    WHERE B.game_id = G.game_id
-//        AND G.wl = "L"
-//        AND ((B.moneyline_price1 < 0))
-//    GROUP BY G.team_id
-// )
-// SELECT uwg.team_id, (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) as win_pctg,
-//        uwg.avg_moneyline_win as avg_moneyline_win, ulg.avg_moneyline_loss as avg_moneyline_loss,
-//        (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) * uwg.avg_moneyline_win +
-//        (uwg.num_wins / (uwg.num_wins + ulg.num_losses)) * ulg.avg_moneyline_loss as expected_moneyline_win_or_loss
-// FROM underdog_win_games uwg
-//     JOIN underdog_loss_games ulg ON uwg.team_id = ulg.team_id
-// ORDER BY expected_moneyline_win_or_loss DESC;`,
-//     (err, data) => {
-//       if (err || data.length === 0) {
-//         console.log(err);
-//       } else {
-//         res.json(data);
-//       }
-//     }
-//   );
-// };
-
 // Fetches the top matchups of players based on % of total points scored by these two players in games with both of them playing
 const trivia_top_matchups = async function(req, res) {
   connection.query(
- //    `
- //  WITH total_game_pts AS (
- //    SELECT G1.game_id, G1.pts + G2.pts AS total_pts
- //    FROM game_data G1 JOIN game_data G2 on G1.game_id = G2.game_id AND G1.a_team_id = G2.team_id
- //    WHERE G1.team_id < G2.team_id
- // ),
- // player_stats2 AS (
- //    SELECT PS.pts, PS.player_id, PS.game_id, PS.team_id, P.display_first_last
- //    FROM player_stats PS JOIN players P on PS.player_id = P.person_id
- // )
- // SELECT PS.id1, PS.id2, PS.name1, PS.name2, AVG((PS.pair_pts / G.total_pts)) AS avg_pct_pts, COUNT(*) AS total_games
- // FROM total_game_pts G JOIN (
- //    SELECT PS1.player_id AS id1, PS2.player_id AS id2,
- //           PS1.display_first_last AS name1, PS2.display_first_last AS name2,
- //           PS1.game_id, PS1.pts + PS2.pts AS pair_pts
- //    FROM player_stats2 PS1 JOIN (
- //        SELECT player_id, pts, team_id, game_id, display_first_last
- //        FROM player_stats2
- //    ) PS2 ON PS1.game_id = PS2.game_id AND PS1.player_id < PS2.player_id AND PS1.team_id <> PS2.team_id
- // ) PS ON G.game_id = PS.game_id
- // GROUP BY PS.id1, PS.id2
- // HAVING total_games >= 5
- // ORDER BY avg_pct_pts DESC
- // LIMIT 15;
- //  `
 `
   SELECT * FROM topmatchups
   WHERE total_games >= ${req.query.minimum_games}
@@ -926,7 +842,6 @@ module.exports = {
   player_search,
   team_search,
   game_search,
-  // team_underdog_winrate,
   trivia_top_matchups,
   trivia_arbitrage,
   trivia_spread_players,

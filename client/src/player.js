@@ -73,12 +73,18 @@ const PlayerPage = () => {
     handleSearch(1);
   }, []);
 
+  /*
+    Handles moving to the previous page of results
+  */
   const handlePrevPage = () => {
     if (page > 1) {
       handleSearch(page - 1);
     }
   };
 
+  /*
+    Handles moving to the next page of results
+  */
   const handleNextPage = () => {
     handleSearch(page + 1);
   };
@@ -94,11 +100,17 @@ const PlayerPage = () => {
     setPlayerUnderdog(underdogMoneyRes.data);
   };
 
+  /*
+    Handles resetting the search form
+  */
   const handleReset = () => {
     setPlayerName("");
     handleSearch();
   };
 
+  /*
+    Handles submitting the search form
+  */
   const handleSubmit = (event) => {
     event.preventDefault();
     handleSearch();

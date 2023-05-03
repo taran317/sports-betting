@@ -39,6 +39,9 @@ const GamePage = () => {
         }
     };
 
+    /*
+    Scroll to top of page
+    */
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };

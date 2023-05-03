@@ -63,33 +63,8 @@ const TeamCard = ({ teamId }) => {
 
         fetchData();
     }, [localteamId]);
-
-    // const handleInputChange = (event) => {
-    //     setInputteamId(event.target.value);
-    // };
-
-    // const handleSubmit = () => {
-    //     setteamId(inputteamId);
-    // };
-
     return (
         <Box>
-            {/*<HStack>*/}
-            {/*    <Text fontSize="md" fontWeight="bold" marginRight="10px">*/}
-            {/*        Enter team ID*/}
-            {/*    </Text>*/}
-            {/*    <Input*/}
-            {/*        value={inputteamId}*/}
-            {/*        onChange={handleInputChange}*/}
-            {/*        placeholder="Enter team ID"*/}
-            {/*        size="sm"*/}
-            {/*        width="200px"*/}
-            {/*        marginRight="10px"*/}
-            {/*    />*/}
-            {/*    <Button onClick={handleSubmit} colorScheme="blue" size="sm">*/}
-            {/*        Update*/}
-            {/*    </Button>*/}
-            {/*</HStack>*/}
             {teamId && spreadData[0] && underdogWinData[0] && underdogMoneyData[0] && (
                 <Box
                     borderWidth="1px"

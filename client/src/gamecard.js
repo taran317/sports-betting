@@ -63,32 +63,8 @@ const GameCard = ({ gameId: propGameId}) => {
         fetchData();
     }, [localGameId]);
 
-    // const handleInputChange = (event) => {
-    //     setInputGameId(event.target.value);
-    // };
-
-    // const handleSubmit = () => {
-    //     setGameId(inputGameId);
-    // };
-
     return (
         <Box>
-            {/*<HStack>*/}
-            {/*    <Text fontSize="md" fontWeight="bold" marginRight="10px">*/}
-            {/*        Enter Game ID*/}
-            {/*    </Text>*/}
-            {/*    <Input*/}
-            {/*        value={inputGameId}*/}
-            {/*        onChange={handleInputChange}*/}
-            {/*        placeholder="Enter game ID"*/}
-            {/*        size="sm"*/}
-            {/*        width="200px"*/}
-            {/*        marginRight="10px"*/}
-            {/*    />*/}
-            {/*    <Button onClick={handleSubmit} colorScheme="blue" size="sm">*/}
-            {/*        Update*/}
-            {/*    </Button>*/}
-            {/*</HStack>*/}
             {localGameId && gameData && gameData[0] && gameData[1] && (
                 <Box
                     borderWidth="1px"
@@ -113,14 +89,6 @@ const GameCard = ({ gameId: propGameId}) => {
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                {/* {gameData.map((game, index) => (
-                                    <Tr key={index}>
-                                        <Td>{game.team_id}</Td>
-                                        <Td>{game.pts}</Td>
-                                        <Td>{game.matchup}</Td>
-                                        <Td>{game.game_date}</Td>
-                                    </Tr>
-                                ))} */}
                                 <Tr>
                                     <Td>{gameData[0].matchup}</Td>
                                     <Td>{gameData[0].name}</Td>

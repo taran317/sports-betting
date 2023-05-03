@@ -37,6 +37,9 @@ const theme = extendTheme({
     },
 });
 
+/*
+Chakra UI color mode switcher component
+*/
 const ColorModeSwitcher = () => {
     const { colorMode, toggleColorMode } = useColorMode();
     return (
