@@ -1,3 +1,9 @@
+# Sports Betting App
+
+## Pre-processing code
+
+csv_creation3.ipynb contains the code used to create the csv files used in the app.
+
 ## How to run the app locally
 
 1. run `npm install` to install all the dependencies
